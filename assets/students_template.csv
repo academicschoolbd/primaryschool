@@ -1,0 +1,4 @@
+roll_no,name,class_name,section,gender,dob,parent_name,phone,address,status
+STU-2001,Sample Student One,Grade 1,A,male,2018-03-15,Father Name,01700000001,123 Main St,active
+STU-2002,Sample Student Two,Grade 1,A,female,2018-06-20,Mother Name,01700000002,456 Maple Ave,active
+STU-2003,Sample Student Three,Grade 2,A,male,2017-09-10,Parent Name,01700000003,789 Oak Rd,active
