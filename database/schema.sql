@@ -266,3 +266,36 @@ INSERT INTO settings (`key`,`value`) VALUES
 ('home_show_calendar',     '1'),
 ('home_show_anthem',       '1'),
 ('home_show_links',        '1');
+
+
+
+-- ==== CMS pages (super admin can create unlimited pages) ====
+DROP TABLE IF EXISTS pages;
+CREATE TABLE pages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(120) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    body MEDIUMTEXT,
+    is_published TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO pages (slug, title, body, is_published) VALUES
+('about-institution',     'প্রতিষ্ঠান সম্পর্কে',          '<p>আমাদের শিক্ষা প্রতিষ্ঠানে আপনাকে স্বাগতম। এখানে বিস্তারিত তথ্য সুপার অ্যাডমিন প্যানেল থেকে এডিট করা যাবে।</p>', 1),
+('honor-board',            'অনার বোর্ড',                '<p>সেরা শিক্ষার্থীদের তালিকা এখানে প্রকাশিত হবে।</p>', 1),
+('founder-donor-info',     'প্রতিষ্ঠাতা ও দানকারী',       '<p>প্রতিষ্ঠাতা ও দানকারীগণের তথ্য।</p>', 1),
+('annual-report',          'এনুয়াল রিপোর্ট',             '<p>বার্ষিক প্রতিবেদন এখানে যোগ করুন।</p>', 1),
+('class-routine',          'ক্লাস রুটিন',               '<p>সকল শ্রেণীর ক্লাস রুটিন এখানে প্রকাশিত হবে।</p>', 1),
+('exam-routine',           'পরীক্ষার রুটিন',            '<p>বার্ষিক ও সাময়িক পরীক্ষার রুটিন।</p>', 1),
+('syllabus',               'সিলেবাস',                  '<p>শ্রেণীভিত্তিক সিলেবাস এখানে প্রকাশিত হবে।</p>', 1),
+('admission',              'অনলাইন ভর্তি',              '<p>ভর্তির আবেদন প্রক্রিয়া ও যোগ্যতা।</p>', 1),
+('admit-card',             'এডমিট কার্ড',              '<p>এডমিট কার্ড সংগ্রহের পদ্ধতি।</p>', 1),
+('fees-payment',           'বেতন পরিশোধ',              '<p>মাসিক বেতন ও অন্যান্য ফি পরিশোধের নিয়ম।</p>', 1),
+('e-book',                 'ই-বুক',                    '<p>ই-বুক ও ডিজিটাল লেকচার শীট।</p>', 1),
+('manual',                 'ম্যানুয়াল',                '<p>প্রতিষ্ঠান পরিচালনার ম্যানুয়াল।</p>', 1),
+('rules-regulations',      'বিধি বিধান',               '<p>প্রতিষ্ঠানের নিয়মাবলী।</p>', 1),
+('hostel-information',     'হোস্টেলের তথ্য',            '<p>হোস্টেলের সুবিধা ও আবাসন তথ্য।</p>', 1),
+('scholarship',            'উপবৃত্তি',                  '<p>উপবৃত্তি ও বৃত্তি সংক্রান্ত তথ্য।</p>', 1),
+('contact',                'যোগাযোগ',                  '<p>যোগাযোগের ঠিকানা ও ফোন নম্বর।</p>', 1);

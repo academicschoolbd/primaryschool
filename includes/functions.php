@@ -328,3 +328,37 @@ function public_api_headers() {
         exit;
     }
 }
+
+
+
+// ====================================================================
+// HTML sanitization for CMS-edited content
+// ====================================================================
+
+/**
+ * Sanitize user-submitted HTML for safe rendering on the public site.
+ * Allows a curated set of tags and strips event handlers + javascript: URLs.
+ * For production-grade XSS protection, swap in HTMLPurifier.
+ */
+function sanitize_html($html) {
+    $allowed = '<p><br><b><strong><i><em><u><s><h1><h2><h3><h4><h5><h6>'
+             . '<ul><ol><li><a><img><table><thead><tbody><tr><td><th>'
+             . '<blockquote><pre><code><hr><div><span><figure><figcaption>';
+    $html = strip_tags((string)$html, $allowed);
+    // strip on* event handlers
+    $html = preg_replace('/\s+on\w+\s*=\s*"[^"]*"/i', '', $html);
+    $html = preg_replace("/\s+on\w+\s*=\s*'[^']*'/i", '', $html);
+    $html = preg_replace('/\s+on\w+\s*=\s*[^\s>]+/i', '', $html);
+    // strip javascript: URLs
+    $html = preg_replace('/(href|src)\s*=\s*["\']?\s*javascript:[^"\'>]*["\']?/i', '', $html);
+    return $html;
+}
+
+/** URL-safe slug generator (preserves Bangla) */
+function slugify($s) {
+    $s = trim((string)$s);
+    $s = preg_replace('/[\s\/]+/', '-', $s);
+    $s = preg_replace('/[^\p{L}\p{N}\-_]/u', '', $s);
+    $s = trim(strtolower($s), '-');
+    return $s ?: 'page';
+}

@@ -55,8 +55,27 @@ window.APP = {
             <a href="classes.php" class="<?= $current === 'classes' ? 'active' : '' ?>">
                 <i class="bi bi-bookmark-star-fill"></i> Classes
             </a>
+            <a href="subjects.php" class="<?= $current === 'subjects' ? 'active' : '' ?>">
+                <i class="bi bi-book-fill"></i> Subjects
+            </a>
             <a href="notices.php" class="<?= $current === 'notices' ? 'active' : '' ?>">
                 <i class="bi bi-megaphone-fill"></i> Notices
+            </a>
+        </nav>
+
+        <div class="menu-label">Site Content</div>
+        <nav>
+            <a href="pages.php" class="<?= $current === 'pages' ? 'active' : '' ?>">
+                <i class="bi bi-file-text-fill"></i> CMS Pages
+            </a>
+            <a href="sliders.php" class="<?= $current === 'sliders' ? 'active' : '' ?>">
+                <i class="bi bi-images"></i> Hero Sliders
+            </a>
+            <a href="leadership.php" class="<?= $current === 'leadership' ? 'active' : '' ?>">
+                <i class="bi bi-chat-quote-fill"></i> Leadership Msgs
+            </a>
+            <a href="gallery.php" class="<?= $current === 'gallery' ? 'active' : '' ?>">
+                <i class="bi bi-camera-fill"></i> Photo Gallery
             </a>
         </nav>
 

@@ -1223,3 +1223,112 @@ body.public img { max-width: 100%; height: auto; }
     .fn-btn-light { margin-left: 0; }
     .fn-btn { width: 100%; justify-content: center; }
 }
+
+
+
+/* ====================================================================
+   CMS page renderer + scroll color fix
+   ==================================================================== */
+
+/* Scroll-color fix: prevent iOS rubber-band white flash and unify the bg */
+html { background-color: var(--bg-light); overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+body.public { background: var(--bg-light); min-height: 100vh; }
+
+/* Smooth scroll for anchor links */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.cms-page-section { padding: 36px 0 60px; }
+
+.cms-page-card {
+    background: #fff; border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm); overflow: hidden;
+    max-width: 920px; margin: 0 auto;
+}
+.cms-page-meta {
+    background: var(--bg-section); border-bottom: 1px solid var(--border);
+    padding: 12px 28px; font-size: 13px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.cms-page-meta i { color: var(--accent); }
+.cms-edit-link {
+    margin-left: auto; font-size: 12px; font-weight: 600;
+    color: var(--primary); padding: 4px 10px;
+    border: 1px solid var(--border); border-radius: 99px;
+    transition: var(--transition);
+}
+.cms-edit-link:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.cms-page-body {
+    padding: 32px 28px; font-size: 15px;
+    line-height: 1.85; color: var(--text-dark);
+}
+.cms-page-body h1, .cms-page-body h2, .cms-page-body h3,
+.cms-page-body h4, .cms-page-body h5, .cms-page-body h6 {
+    color: var(--primary); margin: 22px 0 12px;
+    line-height: 1.35;
+}
+.cms-page-body h2 { font-size: 1.4rem; padding-bottom: 8px; border-bottom: 2px solid var(--accent); display: inline-block; }
+.cms-page-body h3 { font-size: 1.2rem; }
+.cms-page-body p { margin: 0 0 14px; }
+.cms-page-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.cms-page-body a:hover { color: var(--accent-dark); }
+.cms-page-body ul, .cms-page-body ol { margin: 0 0 16px; padding-left: 24px; }
+.cms-page-body li { margin-bottom: 6px; }
+.cms-page-body img { border-radius: 8px; margin: 10px 0; box-shadow: var(--shadow-sm); }
+.cms-page-body table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: 14px;
+}
+.cms-page-body table th, .cms-page-body table td {
+    border: 1px solid var(--border); padding: 9px 12px;
+}
+.cms-page-body table th { background: var(--bg-section); color: var(--primary); font-weight: 700; text-align: left; }
+.cms-page-body blockquote {
+    border-left: 4px solid var(--accent);
+    background: rgba(249,168,37,0.06);
+    padding: 12px 18px; margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+    color: var(--text-dark); font-style: italic;
+}
+.cms-page-body code {
+    background: var(--bg-section); padding: 2px 6px;
+    border-radius: 4px; font-size: 0.9em; color: var(--accent-dark);
+}
+.cms-page-body hr {
+    border: 0; border-top: 1px solid var(--border);
+    margin: 22px 0;
+}
+
+
+
+.cms-404 {
+    background: #fff; border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 50px 24px; text-align: center;
+    max-width: 520px; margin: 30px auto;
+}
+.cms-404 .icon {
+    width: 80px; height: 80px; margin: 0 auto 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-size: 32px; box-shadow: 0 8px 24px rgba(26,35,126,0.25);
+}
+.cms-404 h3 { color: var(--primary); margin: 0 0 8px; }
+.cms-404 p { color: var(--text-muted); margin: 0 0 8px; }
+.cms-404 code {
+    background: var(--bg-section); padding: 2px 8px;
+    border-radius: 4px; font-size: 12px;
+}
+
+/* Mobile tweaks for CMS pages */
+@media (max-width: 576px) {
+    .cms-page-section { padding: 24px 0 40px; }
+    .cms-page-body { padding: 22px 18px; font-size: 14px; }
+    .cms-page-meta { padding: 10px 18px; font-size: 12px; }
+    .cms-edit-link { margin-left: 0; }
+    .cms-404 { padding: 36px 18px; }
+    .cms-404 .icon { width: 64px; height: 64px; font-size: 24px; }
+}

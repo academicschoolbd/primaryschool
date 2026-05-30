@@ -392,3 +392,69 @@ INSERT INTO settings (`key`,`value`) VALUES
 - **True PDF compression** — call Ghostscript (`gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook`) in `api/notices_save.php` if the binary is available; falls back to as-is upload otherwise
 - **Slider / Message / Gallery CRUD** — admin pages for the homepage's hero swiper, leadership messages, and photo gallery (currently editable via SQL)
 - **Mobile app auth** — `auth_tokens` + `student_users` (PIN login) + `device_tokens` (push) tables
+
+
+
+---
+
+## CMS Pages — every dropdown link is now editable
+
+The admin panel now ships with a full **CMS Pages** section (`/admin/pages.php`). Every navigation dropdown item points at `page.php?slug=<name>`, so the super-admin can fill in any page from one place — no PHP edits needed.
+
+| URL pattern | Renders |
+|---|---|
+| `/page.php?slug=about-institution` | The `about-institution` row from the `pages` table |
+| `/page.php?slug=class-routine` | Class routine page |
+| `/page.php?slug=syllabus` | Syllabus page |
+| `/page.php?slug=contact` | Contact page |
+| `/page.php?slug=anything-you-want` | Whatever the admin types into the CMS |
+
+Pages support sanitized HTML (allowlist of common tags, all `on*` event handlers and `javascript:` URLs are stripped). 404 page when slug is missing or unpublished. Admins viewing a page see an "এডিট করুন" link to jump straight to the editor.
+
+**Public mobile-app endpoint:** `GET /api/public_page.php?slug=foo` returns the same content as JSON with CORS headers.
+
+## Site content controllable from the admin panel
+
+Every visual block on the homepage and every public page is now editable end-to-end through the admin panel:
+
+| Admin URL | Manages |
+|---|---|
+| `/admin/pages.php`      | CMS pages (any nav-dropdown destination) |
+| `/admin/sliders.php`    | Hero swiper slides — image upload + caption + active toggle + sort order |
+| `/admin/leadership.php` | Principal/VP/Chairman cards — photo upload + name + designation + body |
+| `/admin/gallery.php`    | Homepage photo gallery — image upload + caption + sort |
+| `/admin/notices.php`    | Notice board (existing) — PDF upload + floating popup |
+| `/admin/subjects.php`   | Exam subjects — name, code, full marks, pass marks |
+| `/admin/teachers.php`   | Teacher records (existing) — photo, designation |
+| `/admin/students.php`   | Student records (existing) — class+section cascading |
+| `/admin/classes.php`    | Classes (existing) — separate add-class / add-section / inline teacher AJAX |
+| `/admin/settings.php`   | Theme colors + school info + 13 homepage section toggles + floating popup global switch |
+
+All image uploads live under `assets/uploads/{teachers,sliders,messages,gallery,notices}/` with MIME validation and old-file cleanup on replace/delete.
+
+## Scroll color fix
+
+Two CSS additions stop the iOS rubber-band overscroll showing the wrong (white) color:
+
+```css
+html { background-color: var(--bg-light); overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+body.public { background: var(--bg-light); min-height: 100vh; }
+```
+
+Plus `scroll-behavior: smooth` for in-page anchor links (with a `prefers-reduced-motion` opt-out for accessibility), and the same fix in the admin theme so the deep-blue sidebar gradient extends past any overscroll bounce.
+
+## Schema additions
+
+Run **`migrate.php`** once after pulling — it's safe and non-destructive. It will add what's missing:
+
+- `pages` table (CMS pages) + 16 stub rows for common menu items
+- All previously-added columns (settings, students.photo, notices.pdf_url, etc.)
+- Upload directories (`assets/uploads/messages/`, `sliders/`, `gallery/`)
+
+## Roadmap (still pending)
+
+- Student CSV bulk import (preview + AJAX import in batches)
+- Subject-wise / Teacher-wise mark entry grid
+- Custom exam creator (replace `first/mid/final` enum with an `exams` table)
+- Real PDF compression via Ghostscript in `notices_save.php`
+- Replace plain-text-with-HTML CMS editor with Quill / TipTap rich text

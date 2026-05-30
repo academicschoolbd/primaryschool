@@ -90,12 +90,13 @@ window.APP = {
             <button class="t2-nav-toggle" id="navToggle" aria-label="Toggle navigation"><i class="fa fa-bars"></i></button>
             <ul class="t2-nav-list" id="mainNav">
                 <li class="<?= $activeMenu === 'home' ? 'active' : '' ?>"><a href="<?= BASE_URL ?>/">হোম</a></li>
-                <li class="<?= $activeMenu === 'about' ? 'active' : '' ?>">
+                <li>
                     <a href="javascript:void(0);" class="has-drop">প্রতিষ্ঠান <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="<?= BASE_URL ?>/#about">প্রতিষ্ঠান সম্পর্কে</a></li>
-                        <li><a href="#">অনার বোর্ড</a></li>
-                        <li><a href="#">প্রতিষ্ঠাতা ও দানকারী</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=about-institution">প্রতিষ্ঠান সম্পর্কে</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=honor-board">অনার বোর্ড</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=founder-donor-info">প্রতিষ্ঠাতা ও দানকারী</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=annual-report">এনুয়াল রিপোর্ট</a></li>
                     </ul>
                 </li>
                 <li class="<?= $activeMenu === 'admin' ? 'active' : '' ?>">
@@ -103,22 +104,38 @@ window.APP = {
                     <ul class="t2-dropdown">
                         <li><a href="<?= BASE_URL ?>/teachers.php">শিক্ষক তালিকা</a></li>
                         <li><a href="<?= BASE_URL ?>/students.php">শিক্ষার্থী তালিকা</a></li>
-                        <li><a href="#">কর্মচারী তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=rules-regulations">বিধি বিধান</a></li>
                     </ul>
                 </li>
                 <li class="<?= $activeMenu === 'academic' ? 'active' : '' ?>">
                     <a href="javascript:void(0);" class="has-drop">একাডেমিক <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
                         <li><a href="<?= BASE_URL ?>/result.php">পরীক্ষার ফলাফল</a></li>
-                        <li><a href="<?= ADMIN_URL ?>/marksheet.php">মার্কশীট</a></li>
-                        <li><a href="#">ক্লাস রুটিন</a></li>
-                        <li><a href="#">পরীক্ষার রুটিন</a></li>
-                        <li><a href="#">সিলেবাস</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=class-routine">ক্লাস রুটিন</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=exam-routine">পরীক্ষার রুটিন</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=syllabus">সিলেবাস</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=admission">অনলাইন ভর্তি</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=admit-card">এডমিট কার্ড</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" class="has-drop">তথ্যাবলী <i class="fa fa-chevron-down"></i></a>
+                    <ul class="t2-dropdown">
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=fees-payment">বেতন পরিশোধ</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=scholarship">উপবৃত্তি</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=hostel-information">হোস্টেল তথ্য</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" class="has-drop">ডাউনলোড <i class="fa fa-chevron-down"></i></a>
+                    <ul class="t2-dropdown">
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=manual">ম্যানুয়াল</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=e-book">ই-বুক</a></li>
                     </ul>
                 </li>
                 <li class="<?= $activeMenu === 'notices' ? 'active' : '' ?>"><a href="<?= BASE_URL ?>/notices.php">নোটিশ</a></li>
                 <li class="<?= $activeMenu === 'gallery' ? 'active' : '' ?>"><a href="<?= BASE_URL ?>/#gallery">ফটো গ্যালারী</a></li>
-                <li class="<?= $activeMenu === 'contact' ? 'active' : '' ?>"><a href="<?= BASE_URL ?>/#contact">যোগাযোগ</a></li>
+                <li class="<?= $activeMenu === 'contact' ? 'active' : '' ?>"><a href="<?= BASE_URL ?>/page.php?slug=contact">যোগাযোগ</a></li>
             </ul>
         </div>
     </div>

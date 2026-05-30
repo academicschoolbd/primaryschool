@@ -134,6 +134,44 @@ if (!db_ok()) {
             }
         }
 
+        // ── pages (CMS)
+        if (!tableExists('pages')) {
+            db()->exec("CREATE TABLE pages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                slug VARCHAR(120) UNIQUE NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                body MEDIUMTEXT,
+                is_published TINYINT(1) DEFAULT 1,
+                sort_order INT DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            $results[] = '✓ Created <code>pages</code> table';
+
+            // Seed common stub pages so navigation dropdowns work out of the box
+            $seed = [
+                ['about-institution',  'প্রতিষ্ঠান সম্পর্কে',  '<p>প্রতিষ্ঠান সম্পর্কে বিস্তারিত তথ্য এখানে যোগ করুন।</p>'],
+                ['honor-board',        'অনার বোর্ড',          '<p>অনার বোর্ড।</p>'],
+                ['founder-donor-info', 'প্রতিষ্ঠাতা ও দানকারী', '<p>প্রতিষ্ঠাতাদের তথ্য।</p>'],
+                ['annual-report',      'এনুয়াল রিপোর্ট',       '<p>বার্ষিক প্রতিবেদন।</p>'],
+                ['class-routine',      'ক্লাস রুটিন',          '<p>ক্লাস রুটিন।</p>'],
+                ['exam-routine',       'পরীক্ষার রুটিন',       '<p>পরীক্ষার রুটিন।</p>'],
+                ['syllabus',           'সিলেবাস',             '<p>সিলেবাস।</p>'],
+                ['admission',          'অনলাইন ভর্তি',         '<p>ভর্তি তথ্য।</p>'],
+                ['admit-card',         'এডমিট কার্ড',         '<p>এডমিট কার্ড সংগ্রহ।</p>'],
+                ['fees-payment',       'বেতন পরিশোধ',         '<p>ফি পরিশোধ।</p>'],
+                ['e-book',             'ই-বুক',               '<p>ই-বুক ও লেকচার শীট।</p>'],
+                ['manual',             'ম্যানুয়াল',           '<p>ম্যানুয়াল।</p>'],
+                ['rules-regulations',  'বিধি বিধান',          '<p>বিধি বিধান।</p>'],
+                ['hostel-information', 'হোস্টেলের তথ্য',       '<p>হোস্টেল তথ্য।</p>'],
+                ['scholarship',        'উপবৃত্তি',            '<p>উপবৃত্তি।</p>'],
+                ['contact',            'যোগাযোগ',             '<p>যোগাযোগ।</p>'],
+            ];
+            $stmt = db()->prepare('INSERT IGNORE INTO pages (slug,title,body,is_published) VALUES (?,?,?,1)');
+            foreach ($seed as [$s,$t,$b]) $stmt->execute([$s,$t,$b]);
+            $results[] = '✓ Seeded ' . count($seed) . ' default CMS pages';
+        }
+
         // ── Seed default settings rows (only inserts what's missing)
         $defaults = [
             'theme_primary'             => '#1a237e',
