@@ -55,6 +55,9 @@ window.APP = {
             <a href="classes.php" class="<?= $current === 'classes' ? 'active' : '' ?>">
                 <i class="bi bi-bookmark-star-fill"></i> Classes
             </a>
+            <a href="notices.php" class="<?= $current === 'notices' ? 'active' : '' ?>">
+                <i class="bi bi-megaphone-fill"></i> Notices
+            </a>
         </nav>
 
         <div class="menu-label">Academic</div>

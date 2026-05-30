@@ -101,8 +101,8 @@ window.APP = {
                 <li class="<?= $activeMenu === 'admin' ? 'active' : '' ?>">
                     <a href="javascript:void(0);" class="has-drop">প্রশাসনিক <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="<?= ADMIN_URL ?>/teachers.php">শিক্ষক তালিকা</a></li>
-                        <li><a href="<?= ADMIN_URL ?>/students.php">শিক্ষার্থী তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/teachers.php">শিক্ষক তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/students.php">শিক্ষার্থী তালিকা</a></li>
                         <li><a href="#">কর্মচারী তালিকা</a></li>
                     </ul>
                 </li>

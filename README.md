@@ -301,3 +301,94 @@ The current schema is intentionally normalised so a mobile app can map cleanly:
 - `student_users (student_id, password_hash, last_login)` — per-student PIN login
 - `auth_tokens (user_id, token, expires_at)` — issue from `/api/auth/login.php` instead of session cookies, so the app can authenticate via `Authorization: Bearer …`
 - All future write APIs should accept JSON body and return JSON — already the convention here.
+
+
+
+---
+
+## Public list pages (mobile-friendly, AJAX)
+
+| URL | What it does |
+|---|---|
+| `/students.php` | শিক্ষার্থী তালিকা — pick class → section → gender → status, AJAX-loaded table with photo |
+| `/teachers.php` | শিক্ষক তালিকা — searchable card grid with photo, designation, subject, contact |
+| `/result.php`   | পরীক্ষার ফলাফল — class+section+roll lookup, prints a marksheet |
+| `/notices.php`  | নোটিশ বোর্ড — full notice board |
+
+All four pages use the same `includes/public_header.php` + `includes/public_footer.php`, and call public CORS-enabled JSON endpoints under `/api/`.
+
+## Class management (admin)
+
+The classes admin page now has three separate flows so each action is a single, focused step:
+
+| Button | What it does |
+|---|---|
+| **+ Add Class** | Creates a brand-new class (e.g. "Grade 1") with optional first section |
+| **+ Add Section** | Pick an existing class → add another section letter under it |
+| **(inline)** | Each row in the listing has an inline teacher dropdown — change it and it AJAX-saves instantly with a toast confirmation |
+
+## Notices admin (`/admin/notices.php`)
+
+Full CRUD with:
+- **PDF upload** (max 6 MB, MIME-validated). Stored under `assets/uploads/notices/`. Replacing an attachment auto-deletes the old file. To enable true compression, install Ghostscript on the server and call `gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook ...` in `api/notices_save.php`.
+- **"Show as floating popup"** — at most one notice can be the floating one. Setting it auto-clears the flag on others.
+- **"Published"** flag — controls whether the notice appears in the marquee, notices page, and floating popup.
+
+A **global on/off toggle** at the top of the page (and in **Settings → Homepage Sections & Floating Popup**) lets the super admin disable the floating popup site-wide without touching individual notices.
+
+## Floating notice popup (public site)
+
+Auto-pops on every public page when:
+1. `floating_notice_enabled = '1'` in settings, **AND**
+2. There is a notice with `is_floating = 1 AND is_published = 1`
+
+The popup:
+- Animates in 800ms after page load
+- Has Title (Bangla) + body + posted date + optional PDF download button + "সকল নোটিশ" link
+- Can be dismissed by clicking the × button, the overlay, the "পরে দেখব" button, or pressing Esc
+- Stores `fnDismissed_<id>` in `localStorage` so the user doesn't see the same notice twice
+- Is fully responsive (full-width on phone, action buttons stack)
+
+## Super-admin "Site Manager" controls
+
+In **/admin/settings.php** an admin can:
+
+1. **Theme colors** — primary + accent with live preview + 8 quick presets (existing)
+2. **School info** — name, address, phone, EIIN, established, logo, map embed (existing)
+3. **Homepage sections & floating popup** (NEW): one checkbox per section. Hide the hero, stats, quick menu, notices, messages, services, gallery, extracurricular, map, sidebar widgets (about/calendar/anthem/links), or the floating popup itself — saved straight to the `settings` table and applied on every visitor's next page load.
+
+## Modern home animations
+
+- **Animated counters** on the stats strip (intersection observer, 1.2s ease-out cubic, supports Bengali numerals)
+- **Scroll reveal stagger** on quick-menu icons, extracurricular cards and teacher cards (fade + slide-up via IntersectionObserver)
+- AOS still used for cards/widgets
+
+## Schema additions
+
+```sql
+ALTER TABLE students  ADD photo VARCHAR(255) NULL;
+ALTER TABLE notices   ADD pdf_url VARCHAR(255) NULL,
+                      ADD pdf_size INT NULL,
+                      ADD is_floating TINYINT(1) DEFAULT 0;
+
+INSERT INTO settings (`key`,`value`) VALUES
+  ('floating_notice_enabled', '1'),
+  ('home_show_hero', '1'),       ('home_show_stats', '1'),
+  ('home_show_quick_menu', '1'), ('home_show_notices', '1'),
+  ('home_show_messages', '1'),   ('home_show_services', '1'),
+  ('home_show_gallery', '1'),    ('home_show_extras', '1'),
+  ('home_show_map', '1'),        ('home_show_about_widget', '1'),
+  ('home_show_calendar', '1'),   ('home_show_anthem', '1'),
+  ('home_show_links', '1');
+```
+
+(Re-run `install.php` to apply — installer DROPs and re-creates tables, so existing data will be lost.)
+
+## Roadmap (next iteration)
+
+- **Student CSV bulk import** — pick a file, preview the first 10 rows, AJAX import in batches with per-row error reporting
+- **Subject-wise / Teacher-wise mark entry** — pick a subject + class + term → grid of all students with one save button
+- **Custom exam creator** — replace the `first/mid/final` enum with a flexible `exams` table (id, name, year, start/end dates), update `results` to FK to `exams`
+- **True PDF compression** — call Ghostscript (`gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook`) in `api/notices_save.php` if the binary is available; falls back to as-is upload otherwise
+- **Slider / Message / Gallery CRUD** — admin pages for the homepage's hero swiper, leadership messages, and photo gallery (currently editable via SQL)
+- **Mobile app auth** — `auth_tokens` + `student_users` (PIN login) + `device_tokens` (push) tables

@@ -198,6 +198,7 @@ $bnMonths = bn_months_arr();
 <main id="main-content">
 
     <!-- ===== Hero Slider ===== -->
+    <?php if (get_setting('home_show_hero', '1') === '1'): ?>
     <section class="t2-hero">
         <div class="swiper t2-hero-swiper">
             <div class="swiper-wrapper">
@@ -224,6 +225,8 @@ $bnMonths = bn_months_arr();
     </section>
 
     <!-- ===== Stats Strip ===== -->
+    <?php endif; // home_show_hero ?>
+    <?php if (get_setting('home_show_stats', '1') === '1'): ?>
     <section class="t2-stats">
         <div class="container">
             <div class="row g-0 text-center">
@@ -248,6 +251,7 @@ $bnMonths = bn_months_arr();
     </section>
 
     <!-- ===== Main Layout ===== -->
+    <?php endif; // home_show_stats ?>
     <section class="t2-main-wrap">
         <div class="container">
             <div class="row g-4">
@@ -256,6 +260,7 @@ $bnMonths = bn_months_arr();
                 <div class="col-lg-8">
 
                     <!-- Quick menu -->
+                    <?php if (get_setting('home_show_quick_menu', '1') === '1'): ?>
                     <div class="t2-card mb-4" data-aos="fade-up">
                         <div class="t2-card-header"><i class="fa fa-th"></i>দ্রুত মেনু</div>
                         <div class="t2-card-body">
@@ -284,6 +289,8 @@ $bnMonths = bn_months_arr();
                     </div>
 
                     <!-- Notice Board -->
+                    <?php endif; // home_show_quick_menu ?>
+                    <?php if (get_setting('home_show_notices', '1') === '1'): ?>
                     <div class="t2-card mb-4" id="notices" data-aos="fade-up" data-aos-delay="100">
                         <div class="t2-card-header" style="justify-content:space-between;">
                             <span><i class="fa fa-clipboard-list"></i>নোটিশ বোর্ড</span>
@@ -322,7 +329,8 @@ $bnMonths = bn_months_arr();
                     </div>
 
                     <!-- Leadership Messages -->
-                    <?php if ($messages): ?>
+                    <?php endif; // home_show_notices ?>
+                    <?php if ($messages && get_setting('home_show_messages', '1') === '1'): ?>
                     <div class="t2-card mb-4" data-aos="fade-up" data-aos-delay="150">
                         <div class="t2-card-header"><i class="fa fa-comment-dots"></i>বাণী ও শুভেচ্ছা</div>
                         <div class="t2-card-body">
@@ -346,6 +354,7 @@ $bnMonths = bn_months_arr();
                     <?php endif; ?>
 
                     <!-- Important Links / Services -->
+                    <?php if (get_setting('home_show_services', '1') === '1'): ?>
                     <div class="t2-card mb-4" data-aos="fade-up" data-aos-delay="150">
                         <div class="t2-card-header"><i class="fa fa-th-list"></i>গুরুত্বপূর্ণ লিঙ্ক ও সেবা</div>
                         <div class="t2-card-body">
@@ -397,7 +406,8 @@ $bnMonths = bn_months_arr();
                     </div>
 
                     <!-- Photo Gallery -->
-                    <?php if ($gallery): ?>
+                    <?php endif; // home_show_services ?>
+                    <?php if ($gallery && get_setting('home_show_gallery', '1') === '1'): ?>
                     <div class="t2-card mb-4" id="gallery" data-aos="fade-up" data-aos-delay="200">
                         <div class="t2-card-header"><i class="fa fa-camera-retro"></i>ছবি গ্যালারী</div>
                         <div class="t2-card-body">
@@ -418,6 +428,7 @@ $bnMonths = bn_months_arr();
                     <?php endif; ?>
 
                     <!-- Extracurricular -->
+                    <?php if (get_setting('home_show_extras', '1') === '1'): ?>
                     <div class="t2-card mb-4" data-aos="fade-up" data-aos-delay="200">
                         <div class="t2-card-header"><i class="fa fa-star"></i>সহ-পাঠক্রমিক কার্যক্রম</div>
                         <div class="t2-card-body">
@@ -442,6 +453,8 @@ $bnMonths = bn_months_arr();
                     </div>
 
                     <!-- Map -->
+                    <?php endif; // home_show_extras ?>
+                    <?php if (get_setting('home_show_map', '1') === '1'): ?>
                     <div class="t2-card mb-4" id="contact" data-aos="fade-up" data-aos-delay="250">
                         <div class="t2-card-header"><i class="fa fa-map-marker-alt"></i>প্রতিষ্ঠানের অবস্থান</div>
                         <div class="t2-card-body p-0" style="overflow:hidden;border-radius:0 0 var(--radius-md) var(--radius-md);">
@@ -455,12 +468,14 @@ $bnMonths = bn_months_arr();
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; // home_show_map ?>
 
                 </div>
 
                 <!-- ============ RIGHT SIDEBAR ============ -->
                 <div class="col-lg-4">
 
+                    <?php if (get_setting('home_show_about_widget', '1') === '1'): ?>
                     <div class="t2-sidebar-widget" id="about" data-aos="fade-left">
                         <div class="t2-widget-head"><i class="fa fa-university"></i>প্রতিষ্ঠান সম্পর্কে</div>
                         <div class="t2-widget-body text-center">
@@ -472,7 +487,9 @@ $bnMonths = bn_months_arr();
                             </div>
                         </div>
                     </div>
+                    <?php endif; // home_show_about_widget ?>
 
+                    <?php if (get_setting('home_show_calendar', '1') === '1'): ?>
                     <div class="t2-sidebar-widget" data-aos="fade-left" data-aos-delay="100">
                         <div class="t2-widget-head"><i class="fa fa-calendar-alt"></i>ক্যালেন্ডার</div>
                         <div class="t2-widget-body">
@@ -491,7 +508,9 @@ $bnMonths = bn_months_arr();
                             </div>
                         </div>
                     </div>
+                    <?php endif; // home_show_calendar ?>
 
+                    <?php if (get_setting('home_show_links', '1') === '1'): ?>
                     <div class="t2-sidebar-widget" data-aos="fade-left" data-aos-delay="200">
                         <div class="t2-widget-head"><i class="fa fa-link"></i>গুরুত্বপূর্ণ লিঙ্ক</div>
                         <div class="t2-widget-body">
@@ -521,7 +540,9 @@ $bnMonths = bn_months_arr();
                             </div>
                         </div>
                     </div>
+                    <?php endif; // home_show_links ?>
 
+                    <?php if (get_setting('home_show_anthem', '1') === '1'): ?>
                     <div class="t2-sidebar-widget" data-aos="fade-left" data-aos-delay="250">
                         <div class="t2-widget-head"><i class="fa fa-music"></i>জাতীয় সংগীত</div>
                         <div class="t2-widget-body">
@@ -531,6 +552,7 @@ $bnMonths = bn_months_arr();
                             </audio>
                         </div>
                     </div>
+                    <?php endif; // home_show_anthem ?>
 
                 </div>
 

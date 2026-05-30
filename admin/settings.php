@@ -9,6 +9,21 @@ if (($user['role'] ?? '') !== 'admin') {
     redirect('index.php');
 }
 
+// === Handle visibility / floating settings save ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site_visibility' && db_ok()) {
+    $toggles = [
+        'home_show_hero','home_show_stats','home_show_quick_menu','home_show_notices',
+        'home_show_messages','home_show_services','home_show_gallery','home_show_extras',
+        'home_show_map','home_show_about_widget','home_show_calendar','home_show_anthem','home_show_links',
+        'floating_notice_enabled',
+    ];
+    foreach ($toggles as $k) {
+        set_setting($k, !empty($_POST[$k]) ? '1' : '0');
+    }
+    flash_set('success', 'Homepage visibility updated.');
+    redirect('settings.php');
+}
+
 // === Handle school-info save (non-AJAX, submits to same page) ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'school_info' && db_ok()) {
     $fields = ['name_bn','name_en','tagline','address','phone','email','website','eiin','established','logo','about_bn','map_embed'];
@@ -244,6 +259,63 @@ $presets = [
             </div>
         </div>
     </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <div class="card-h">
+        <h3><i class="bi bi-toggles"></i> Homepage Sections &amp; Floating Popup</h3>
+        <span class="badge badge-info">Super-admin only</span>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">
+        Toggle which sections appear on the public homepage and whether the floating notice popup is allowed.
+        Unchecking a section hides it from every visitor instantly after save.
+    </p>
+    <form method="post">
+        <input type="hidden" name="form" value="site_visibility">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:10px;">
+            <?php
+            $sectionToggles = [
+                'home_show_hero'         => ['🎬 Hero slider',           'Top image carousel'],
+                'home_show_stats'        => ['📊 Stats strip',           'Students/teachers/years'],
+                'home_show_quick_menu'   => ['⚡ Quick menu',             '8-tile icon grid'],
+                'home_show_notices'      => ['📋 Notice board',          'Recent notices card'],
+                'home_show_messages'     => ['💬 Leadership messages',   'Principal/VP messages'],
+                'home_show_services'     => ['📁 Important links',       'Services grid'],
+                'home_show_gallery'      => ['📷 Photo gallery',         'Image grid'],
+                'home_show_extras'       => ['⭐ Extracurricular',       'Activities cards'],
+                'home_show_map'          => ['🗺️ Map',                   'Embedded map'],
+                'home_show_about_widget' => ['🏛️ Sidebar: About',        'Right column'],
+                'home_show_calendar'     => ['📅 Sidebar: Calendar',     'Bengali calendar'],
+                'home_show_anthem'       => ['🎵 Sidebar: National anthem','Audio player'],
+                'home_show_links'        => ['🔗 Sidebar: Important links','External links'],
+            ];
+            foreach ($sectionToggles as $k => [$lbl, $hint]):
+                $checked = get_setting($k, '1') === '1';
+            ?>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:10px;background:var(--bg);border-radius:8px;cursor:pointer;border:1px solid var(--line);">
+                <input type="checkbox" name="<?= e($k) ?>" value="1" <?= $checked ? 'checked' : '' ?> style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+                <div>
+                    <b style="font-size:13px;display:block;"><?= e($lbl) ?></b>
+                    <span style="font-size:11px;color:var(--muted);"><?= e($hint) ?></span>
+                </div>
+            </label>
+            <?php endforeach; ?>
+        </div>
+        <hr style="margin:20px 0;border:none;border-top:1px solid var(--line);">
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.3);border-radius:10px;cursor:pointer;">
+            <input type="checkbox" name="floating_notice_enabled" value="1" <?= get_setting('floating_notice_enabled', '1')==='1'?'checked':'' ?> style="width:18px;height:18px;">
+            <div>
+                <b style="font-size:13.5px;color:var(--accent-dark);">📢 Floating notice popup (global)</b>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+                    When enabled, any notice marked "is floating" auto-pops up on the public site. Visitors can dismiss it.
+                </div>
+            </div>
+        </label>
+        <div style="margin-top:18px;display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Visibility</button>
+            <a href="<?= BASE_URL ?>/" target="_blank" class="btn btn-light"><i class="bi bi-eye"></i> Preview</a>
+        </div>
+    </form>
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

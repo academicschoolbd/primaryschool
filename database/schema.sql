@@ -62,6 +62,7 @@ CREATE TABLE students (
     parent_name VARCHAR(120),
     phone VARCHAR(30),
     address VARCHAR(255),
+    photo VARCHAR(255) DEFAULT NULL,
     status ENUM('active','inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -107,6 +108,9 @@ CREATE TABLE notices (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     body TEXT,
+    pdf_url VARCHAR(255) DEFAULT NULL,
+    pdf_size INT DEFAULT NULL,
+    is_floating TINYINT(1) DEFAULT 0,
     is_published TINYINT(1) DEFAULT 1,
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -159,15 +163,15 @@ INSERT INTO subjects (name,code,full_marks,pass_marks) VALUES
 ('Social Studies','SST',100,33),
 ('Computer','COMP',100,33);
 
-INSERT INTO students (roll_no,name,class_id,gender,dob,parent_name,phone,address,status) VALUES
-('STU-1001','Aria Khan',5,'female','2014-03-12','Imran Khan','555-1001','12 Maple Ave','active'),
-('STU-1002','Daniel Ortiz',4,'male','2015-07-22','Maria Ortiz','555-1002','45 Oak Street','active'),
-('STU-1003','Zoya Ahmed',3,'female','2016-11-04','Fahim Ahmed','555-1003','7 Pine Road','active'),
-('STU-1004','Mason Lee',2,'male','2017-05-18','Jenny Lee','555-1004','89 Cedar Blvd','active'),
-('STU-1005','Emma Watson',1,'female','2018-01-30','Chris Watson','555-1005','22 Elm Court','active'),
-('STU-1006','Liam Garcia',5,'male','2014-09-09','Sofia Garcia','555-1006','33 Birch Way','active'),
-('STU-1007','Olivia Patel',4,'female','2015-12-15','Raj Patel','555-1007','11 Willow Ln','active'),
-('STU-1008','Noah Cooper',3,'male','2016-02-27','Amy Cooper','555-1008','4 Cherry St','inactive');
+INSERT INTO students (roll_no,name,class_id,gender,dob,parent_name,phone,address,photo,status) VALUES
+('STU-1001','Aria Khan',5,'female','2014-03-12','Imran Khan','555-1001','12 Maple Ave','https://placehold.co/200x250/4f46e5/ffffff?text=AK','active'),
+('STU-1002','Daniel Ortiz',4,'male','2015-07-22','Maria Ortiz','555-1002','45 Oak Street','https://placehold.co/200x250/0ea5e9/ffffff?text=DO','active'),
+('STU-1003','Zoya Ahmed',3,'female','2016-11-04','Fahim Ahmed','555-1003','7 Pine Road','https://placehold.co/200x250/ec4899/ffffff?text=ZA','active'),
+('STU-1004','Mason Lee',2,'male','2017-05-18','Jenny Lee','555-1004','89 Cedar Blvd','https://placehold.co/200x250/10b981/ffffff?text=ML','active'),
+('STU-1005','Emma Watson',1,'female','2018-01-30','Chris Watson','555-1005','22 Elm Court','https://placehold.co/200x250/8b5cf6/ffffff?text=EW','active'),
+('STU-1006','Liam Garcia',5,'male','2014-09-09','Sofia Garcia','555-1006','33 Birch Way','https://placehold.co/200x250/f59e0b/ffffff?text=LG','active'),
+('STU-1007','Olivia Patel',4,'female','2015-12-15','Raj Patel','555-1007','11 Willow Ln','https://placehold.co/200x250/ef4444/ffffff?text=OP','active'),
+('STU-1008','Noah Cooper',3,'male','2016-02-27','Amy Cooper','555-1008','4 Cherry St',NULL,'inactive');
 
 INSERT INTO results (student_id,subject_id,exam_term,marks_obtained,grade) VALUES
 -- Aria Khan (id 1) - final
@@ -204,13 +208,13 @@ INSERT INTO sliders (image, caption, is_active, sort_order) VALUES
 ('https://picsum.photos/seed/school2/1400/500', 'বার্ষিক ক্রীড়া প্রতিযোগিতা ২০২৬', 1, 2),
 ('https://picsum.photos/seed/school3/1400/500', 'বিজ্ঞান মেলায় শিক্ষার্থীদের অংশগ্রহণ', 1, 3);
 
-INSERT INTO notices (title, body, is_published, posted_at) VALUES
-('ভর্তি কার্যক্রম ২০২৬-২৭ শুরু হয়েছে', 'আগামী শিক্ষাবর্ষের জন্য অনলাইন আবেদন গ্রহণ শুরু হয়েছে। বিস্তারিত নোটিশ দেখুন।', 1, NOW() - INTERVAL 1 DAY),
-('বার্ষিক পরীক্ষার সময়সূচী প্রকাশ', 'সকল শ্রেণীর বার্ষিক পরীক্ষার সময়সূচী ওয়েবসাইটে প্রকাশ করা হয়েছে।', 1, NOW() - INTERVAL 4 DAY),
-('পরিচ্ছন্নতা সপ্তাহ পালন', 'আগামী ১৫ জুন থেকে ২১ জুন পর্যন্ত পরিচ্ছন্নতা সপ্তাহ পালিত হবে।', 1, NOW() - INTERVAL 7 DAY),
-('শিক্ষক প্রশিক্ষণ কর্মশালা', 'মাসিক শিক্ষক প্রশিক্ষণ কর্মশালা আগামী শনিবার অনুষ্ঠিত হবে।', 1, NOW() - INTERVAL 12 DAY),
-('গ্রীষ্মকালীন ছুটির বিজ্ঞপ্তি', 'গ্রীষ্মকালীন ছুটি ১ জুলাই থেকে ১৫ জুলাই পর্যন্ত।', 1, NOW() - INTERVAL 18 DAY),
-('পাঠ্যপুস্তক বিতরণ', 'নতুন শিক্ষাবর্ষের পাঠ্যপুস্তক বিতরণ ১ জানুয়ারি থেকে শুরু।', 1, NOW() - INTERVAL 25 DAY);
+INSERT INTO notices (title, body, pdf_url, is_floating, is_published, posted_at) VALUES
+('ভর্তি কার্যক্রম ২০২৬-২৭ শুরু হয়েছে', 'আগামী শিক্ষাবর্ষের জন্য অনলাইন আবেদন গ্রহণ শুরু হয়েছে। বিস্তারিত নোটিশ দেখুন।', NULL, 1, 1, NOW() - INTERVAL 1 DAY),
+('বার্ষিক পরীক্ষার সময়সূচী প্রকাশ', 'সকল শ্রেণীর বার্ষিক পরীক্ষার সময়সূচী ওয়েবসাইটে প্রকাশ করা হয়েছে।', NULL, 0, 1, NOW() - INTERVAL 4 DAY),
+('পরিচ্ছন্নতা সপ্তাহ পালন', 'আগামী ১৫ জুন থেকে ২১ জুন পর্যন্ত পরিচ্ছন্নতা সপ্তাহ পালিত হবে।', NULL, 0, 1, NOW() - INTERVAL 7 DAY),
+('শিক্ষক প্রশিক্ষণ কর্মশালা', 'মাসিক শিক্ষক প্রশিক্ষণ কর্মশালা আগামী শনিবার অনুষ্ঠিত হবে।', NULL, 0, 1, NOW() - INTERVAL 12 DAY),
+('গ্রীষ্মকালীন ছুটির বিজ্ঞপ্তি', 'গ্রীষ্মকালীন ছুটি ১ জুলাই থেকে ১৫ জুলাই পর্যন্ত।', NULL, 0, 1, NOW() - INTERVAL 18 DAY),
+('পাঠ্যপুস্তক বিতরণ', 'নতুন শিক্ষাবর্ষের পাঠ্যপুস্তক বিতরণ ১ জানুয়ারি থেকে শুরু।', NULL, 0, 1, NOW() - INTERVAL 25 DAY);
 
 INSERT INTO school_messages (name, designation, photo, content, sort_order) VALUES
 ('জনাব মোঃ রফিকুল ইসলাম',
@@ -242,4 +246,23 @@ CREATE TABLE settings (
 
 INSERT INTO settings (`key`,`value`) VALUES
 ('theme_primary', '#1a237e'),
-('theme_accent',  '#f9a825');
+('theme_accent',  '#f9a825'),
+('floating_notice_enabled', '1');
+
+
+
+-- Homepage section visibility (super admin can toggle each section on/off)
+INSERT INTO settings (`key`,`value`) VALUES
+('home_show_hero',         '1'),
+('home_show_stats',        '1'),
+('home_show_quick_menu',   '1'),
+('home_show_notices',      '1'),
+('home_show_messages',     '1'),
+('home_show_services',     '1'),
+('home_show_gallery',      '1'),
+('home_show_extras',       '1'),
+('home_show_map',          '1'),
+('home_show_about_widget', '1'),
+('home_show_calendar',     '1'),
+('home_show_anthem',       '1'),
+('home_show_links',        '1');

@@ -100,6 +100,101 @@ document.querySelectorAll('.t2-nav-list .has-drop').forEach(link => {
 window.addEventListener('scroll', () => {
     document.getElementById('backToTop')?.classList.toggle('show', window.scrollY > 300);
 });
+
+// ============ Animated counter on stats ============
+function animateCounter(el, target) {
+    const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    const isBn = /[০-৯]/.test(el.textContent);
+    const dur = 1200;
+    const start = performance.now();
+    function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const v = Math.round(target * eased);
+        el.textContent = isBn ? String(v).split('').map(c => /\d/.test(c) ? bnDigits[+c] : c).join('') : v;
+        if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+const statObs = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+        if (en.isIntersecting) {
+            const el = en.target;
+            const original = el.textContent.trim();
+            const num = Number(original.replace(/[^0-9]/g, '')) || 0;
+            if (num > 0) animateCounter(el, num);
+            statObs.unobserve(el);
+        }
+    });
+}, { threshold: 0.4 });
+document.querySelectorAll('.t2-stat-item .stat-num').forEach(el => statObs.observe(el));
+
+// ============ Scroll reveal staggered ============
+const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+        if (en.isIntersecting) {
+            en.target.classList.add('in-view');
+            revealObs.unobserve(en.target);
+        }
+    });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.t2-quick-item, .t2-extra-card, .t2-teacher-card').forEach(el => {
+    el.classList.add('scroll-reveal');
+    revealObs.observe(el);
+});
+
+// ============ Floating notice popup ============
+(async function() {
+    try {
+        const r = await fetch(window.APP.api + '/floating_notice.php');
+        const j = await r.json();
+        if (!j.ok || !j.data) return;
+        const n = j.data;
+        const dismissedKey = 'fnDismissed_' + n.id;
+        if (localStorage.getItem(dismissedKey) === '1') return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'fn-overlay';
+        const safe = (s) => String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        overlay.innerHTML = `
+            <div class="fn-modal" role="dialog" aria-modal="true">
+                <div class="fn-modal-head">
+                    <div class="icon"><i class="fa fa-bell"></i></div>
+                    <div>
+                        <div class="label">গুরুত্বপূর্ণ নোটিশ</div>
+                        <div class="title-bn">${safe(n.title)}</div>
+                    </div>
+                    <button type="button" class="fn-modal-close" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="fn-modal-body">
+                    <div class="meta"><i class="fa fa-calendar-alt"></i> ${safe(n.posted_at_label)}</div>
+                    ${n.body ? '<div>' + safe(n.body).replace(/\n/g, '<br>') + '</div>' : ''}
+                </div>
+                <div class="fn-modal-actions">
+                    ${n.pdf_url ? `<a href="${safe(n.pdf_url)}" target="_blank" class="fn-btn fn-btn-primary"><i class="fa fa-file-pdf"></i> PDF ডাউনলোড</a>` : ''}
+                    <a href="${window.APP.base}/notices.php#n${n.id}" class="fn-btn fn-btn-primary"><i class="fa fa-arrow-right"></i> সকল নোটিশ</a>
+                    <button type="button" class="fn-btn fn-btn-light" data-action="close">পরে দেখব</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay.classList.add('show'), 800);
+
+        function close() {
+            overlay.classList.remove('show');
+            localStorage.setItem(dismissedKey, '1');
+            setTimeout(() => overlay.remove(), 300);
+        }
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) close();
+            if (e.target.closest('[data-action=close]')) close();
+            if (e.target.closest('.fn-modal-close')) close();
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); }, { once: true });
+    } catch (e) { /* silently fail */ }
+})();
 </script>
 </body>
 </html>
