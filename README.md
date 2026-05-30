@@ -215,3 +215,89 @@ Adjust the thresholds in one place to retheme the gradebook.
 ## License
 
 MIT — use freely for your school or as a starting point for a commercial product.
+
+
+
+---
+
+## Public Result Page (`/result.php`)
+
+A fully responsive Bangla/English result-lookup page for parents and students.
+
+**Flow:**
+1. Pick **শ্রেণী** (Class) → sections auto-load via AJAX
+2. Pick **শাখা** (Section)
+3. Enter **রোল নম্বর** (Roll No)
+4. Choose exam term (প্রথম সাময়িক / দ্বিতীয় সাময়িক / বার্ষিক)
+5. Click "ফলাফল দেখুন" → marksheet renders inline (no page reload), printable, sharable on mobile (`navigator.share`)
+
+The marksheet UI auto-collapses to mobile (single-column info, 2-column summary, horizontally-scrollable marks table on small screens).
+
+## Other public pages
+- `/notices.php` — full notice board
+- `/result.php` — result lookup
+- `/` — homepage
+
+All public pages share the same `includes/public_header.php` and `includes/public_footer.php` for consistency.
+
+---
+
+## Public JSON API (CORS-enabled — ready for the mobile app)
+
+These endpoints are designed so a future React Native / Flutter / native mobile app can call them directly. They return `application/json`, set permissive CORS headers, and require **no authentication** (they only expose data the public should see).
+
+| Endpoint | Method | Params | Returns |
+|---|---|---|---|
+| `/api/public_classes.php` | GET | — | List of distinct class names |
+| `/api/public_sections.php` | GET | `class` | Sections under that class with their `class_id` |
+| `/api/public_result.php` | GET | `class_id`, `roll_no`, `exam_term` (`first`\|`mid`\|`final`) | Full marksheet JSON: student, class, school, term, subjects[], summary |
+
+**Response shape (success):**
+```json
+{ "ok": true, "data": { ... } }
+```
+**Response shape (error):**
+```json
+{ "ok": false, "msg": "Human-readable error" }
+```
+HTTP codes: `200` ok · `400` bad input · `404` not found · `503` DB down.
+
+### Example mobile call
+```js
+const r = await fetch(
+  'https://yourdomain/primaryschool/api/public_result.php?class_id=5&roll_no=STU-1001&exam_term=final'
+);
+const j = await r.json();
+if (j.ok) showMarksheet(j.data);
+```
+
+### Admin (auth-required) endpoints
+These need a logged-in admin session (cookie-based today; token-based recommended for mobile in v2):
+`teachers_search`, `teachers_delete`, `students_search`, `students_delete`, `classes_search`, `sections`, `settings_save`.
+
+---
+
+## Database structure for the mobile app
+
+The current schema is intentionally normalised so a mobile app can map cleanly:
+
+| Concept | Table | Notes |
+|---|---|---|
+| Schools | `school_info` | Single tenant today; for multi-tenant add `tenant_id` to every other table |
+| Auth users | `users` | Web admin/teacher accounts (bcrypt). For mobile, add a `tokens` table or reuse `users` with API tokens |
+| Classes | `classes` | `(name, section)` pair = one row, used both for filtering and as the FK target for students |
+| Teachers | `teachers` | Has `photo`, `designation` for app display |
+| Students | `students` | `roll_no` is the public lookup key; pair `(class_id, roll_no)` is effectively unique per school |
+| Subjects | `subjects` | Per-school subjects with full/pass marks |
+| Results | `results` | `UNIQUE(student_id, subject_id, exam_term)` — safe to re-sync from the app |
+| Notices | `notices` | `is_published` controls visibility on public/app |
+| Sliders | `sliders` | `is_active` + `sort_order` for hero on web/app |
+| Gallery | `gallery` | `sort_order` for app's photo grid |
+| Messages | `school_messages` | Principal/VP cards |
+| Settings | `settings` | Key/value (theme colors, etc.) — easy for the app to fetch as JSON |
+
+**Roadmap additions for the mobile app (next iteration):**
+- `device_tokens (id, user_id, token, platform, last_seen)` — for FCM/APNs push
+- `student_users (student_id, password_hash, last_login)` — per-student PIN login
+- `auth_tokens (user_id, token, expires_at)` — issue from `/api/auth/login.php` instead of session cookies, so the app can authenticate via `Authorization: Bearer …`
+- All future write APIs should accept JSON body and return JSON — already the convention here.

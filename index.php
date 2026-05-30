@@ -41,14 +41,8 @@ if (!empty($school['established'])) {
     $stats['years'] = (int) date('Y') - (int) $school['established'];
 }
 
-// Bengali digit conversion helper
-function bn_num($num) {
-    $en = ['0','1','2','3','4','5','6','7','8','9'];
-    $bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    return str_replace($en, $bn, (string)$num);
-}
-
-$bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+// Bengali numerals + month names are defined in includes/functions.php
+$bnMonths = bn_months_arr();
 ?>
 <!DOCTYPE html>
 <html lang="bn">
