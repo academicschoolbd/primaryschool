@@ -111,7 +111,7 @@ window.APP = {
                     <a href="javascript:void(0);" class="has-drop">একাডেমিক <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
                         <li><a href="<?= BASE_URL ?>/result.php">পরীক্ষার ফলাফল</a></li>
-                        <li><a href="<?= BASE_URL ?>/page.php?slug=class-routine">ক্লাস রুটিন</a></li>
+                        <li><a href="<?= BASE_URL ?>/routine.php">ক্লাস রুটিন</a></li>
                         <li><a href="<?= BASE_URL ?>/page.php?slug=exam-routine">পরীক্ষার রুটিন</a></li>
                         <li><a href="<?= BASE_URL ?>/page.php?slug=syllabus">সিলেবাস</a></li>
                         <li><a href="<?= BASE_URL ?>/page.php?slug=admission">অনলাইন ভর্তি</a></li>

@@ -518,3 +518,46 @@ The following are NOT yet implemented; they're the most common asks for a school
 | **Student bulk CSV import** | Preview + AJAX import in batches with per-row error reporting |
 | **PDF compression** | Auto-compress notice PDFs via Ghostscript |
 | **Rich-text CMS editor** | Replace plain HTML textarea with Quill/TipTap |
+
+
+
+---
+
+## Attendance, Routine, Bulk import (latest additions)
+
+### 📋 Daily Attendance (`/admin/attendance.php`)
+Pick **Year + Class+Section + Date** → grid loads every active student in that section. Each row has 4 status pills (Present / Absent / Late / Leave) with color-coded toggles + an optional note field. **Bulk-actions**: "All Present" / "All Absent" buttons set every row in one click. **AJAX batch save** via `/api/save_attendance.php` — every individual status change is recorded in the audit log with before/after diff.
+
+Schema: `attendance (student_id, class_id, year_id, date, status, note, marked_by, …)` with `UNIQUE (student_id, date)` so re-saving the same day is an upsert.
+
+### 🗓 Class Routine (`/admin/routine.php` + public `/routine.php`)
+Admin: pick **Year + Class+Section** → 7-day × 8-period grid with per-cell **subject + teacher** dropdowns. **Each cell saves instantly** via AJAX on change — no master Save button needed. Backend auto-deletes the cell row when both dropdowns are cleared. Default time slots (08:00–15:00) are pre-filled.
+
+Public `/routine.php?class_id=…&year_id=…` shows a clean read-only routine table with the school's theme — accessible from the homepage's একাডেমিক → ক্লাস রুটিন nav. CORS-enabled API at `/api/public_routine.php` for the future mobile app.
+
+### 📥 Bulk Import Students (`/admin/import_students.php`)
+Two-step CSV upload UX:
+1. **Step 1 — Upload + Preview:** Pick CSV (max 4 MB) and target year, click "Preview Rows". Server parses, validates each row (roll_no/name/class_name required, gender = male/female/other, status = active/inactive, class_name+section must match an existing class in the target year), and returns the first 10 rows + total + a list of any errors with row numbers.
+2. **Step 2 — Confirm Import:** Review the preview + error list (with row numbers), click "Import N valid student(s)". Backend inserts in bulk via prepared statements, **every row gets its own audit log entry** with full data captured.
+
+Sample template at `/assets/students_template.csv` (downloadable from the admin page header). Required columns: `roll_no, name, class_name, section, gender, dob, parent_name, phone, address, status`.
+
+### 🔗 Subject ↔ Class mapping (`class_subjects` table)
+Schema is in place (no admin UI yet — added to roadmap): `(class_id, subject_id, teacher_id, year_id)` with unique key, ready for the next iteration's per-teacher subject permission layer.
+
+---
+
+## Updated roadmap (still missing)
+
+- **Subject ↔ Class assignment UI** (table exists, admin page pending)
+- **Per-teacher subject permission layer** so subject teachers only see their own subjects in mark entry
+- **Fees / Payments** module
+- **Attendance reports** (monthly summary per student / class %)
+- **ID cards / Admit cards** with QR codes
+- **Certificates** generator (transfer, character, marksheet PDF)
+- **Parent / Student / Teacher login flows**
+- **SMS notifications** (Bangladeshi gateway integration)
+- **Library / Hostel / Transport** modules
+- **Backup/Export** (DB dump button, CSV export per table)
+- **PDF compression** via Ghostscript for notice attachments
+- **Rich-text CMS editor** (Quill/TipTap) replacing the HTML textarea

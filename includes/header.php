@@ -52,6 +52,9 @@ window.APP = {
             <a href="students.php" class="<?= $current === 'students' ? 'active' : '' ?>">
                 <i class="bi bi-people-fill"></i> Students
             </a>
+            <a href="import_students.php" class="<?= $current === 'import_students' ? 'active' : '' ?>">
+                <i class="bi bi-cloud-arrow-up-fill"></i> Bulk Import (CSV)
+            </a>
             <a href="classes.php" class="<?= $current === 'classes' ? 'active' : '' ?>">
                 <i class="bi bi-bookmark-star-fill"></i> Classes
             </a>
@@ -95,6 +98,12 @@ window.APP = {
             </a>
             <a href="marksheet.php" class="<?= $current === 'marksheet' ? 'active' : '' ?>">
                 <i class="bi bi-file-earmark-text-fill"></i> Marksheet
+            </a>
+            <a href="attendance.php" class="<?= $current === 'attendance' ? 'active' : '' ?>">
+                <i class="bi bi-clipboard-check-fill"></i> Attendance
+            </a>
+            <a href="routine.php" class="<?= $current === 'routine' ? 'active' : '' ?>">
+                <i class="bi bi-calendar-week-fill"></i> Class Routine
             </a>
             <a href="promote.php" class="<?= $current === 'promote' ? 'active' : '' ?>">
                 <i class="bi bi-arrow-up-right-circle-fill"></i> Promote Students
