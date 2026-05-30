@@ -27,11 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
     try {
         if (!empty($_POST['id'])) {
             $sql = 'UPDATE students SET roll_no=?,name=?,class_id=?,gender=?,dob=?,parent_name=?,phone=?,address=?,status=? WHERE id=?';
-            db()->prepare($sql)->execute([...array_values($data), (int)$_POST['id']]);
+            $sid = (int)$_POST['id'];
+            // Audit: snapshot before
+            $bs = db()->prepare('SELECT * FROM students WHERE id=?'); $bs->execute([$sid]); $before = $bs->fetch();
+            db()->prepare($sql)->execute([...array_values($data), $sid]);
+            $diff = diff_changed($before ?: [], $data);
+            audit_log('update', 'student', $sid, $data['name'] . ' (roll ' . $data['roll_no'] . ')', $diff['before'], $diff['after']);
             flash_set('success', 'Student updated.');
         } else {
             $sql = 'INSERT INTO students (roll_no,name,class_id,gender,dob,parent_name,phone,address,status) VALUES (?,?,?,?,?,?,?,?,?)';
             db()->prepare($sql)->execute(array_values($data));
+            $newId = (int)db()->lastInsertId();
+            audit_log('create', 'student', $newId, $data['name'] . ' (roll ' . $data['roll_no'] . ')', null, $data);
             flash_set('success', 'Student added.');
         }
     } catch (PDOException $e) {

@@ -172,6 +172,60 @@ if (!db_ok()) {
             $results[] = '✓ Seeded ' . count($seed) . ' default CMS pages';
         }
 
+        // ── academic_years
+        if (!tableExists('academic_years')) {
+            db()->exec("CREATE TABLE academic_years (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(40) NOT NULL,
+                start_date DATE, end_date DATE,
+                is_current TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uniq_year (name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            $y = (int)date('Y');
+            db()->prepare('INSERT INTO academic_years (name,start_date,end_date,is_current) VALUES (?,?,?,1)')
+                ->execute([(string)$y, "$y-01-01", "$y-12-31"]);
+            $results[] = '✓ Created <code>academic_years</code> table + ' . $y . ' (current)';
+        }
+
+        // ── audit_log
+        if (!tableExists('audit_log')) {
+            db()->exec("CREATE TABLE audit_log (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT, user_name VARCHAR(120), user_role VARCHAR(40),
+                action VARCHAR(40) NOT NULL,
+                entity_type VARCHAR(40) NOT NULL,
+                entity_id INT, entity_label VARCHAR(255),
+                changes_json MEDIUMTEXT,
+                ip_address VARCHAR(45), user_agent VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_entity (entity_type, entity_id),
+                INDEX idx_user (user_id), INDEX idx_created (created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            $results[] = '✓ Created <code>audit_log</code> table (anti-fraud history)';
+        }
+
+        // ── results.year_id column
+        if (tableExists('results') && !columnExists('results', 'year_id')) {
+            db()->exec("ALTER TABLE results ADD COLUMN year_id INT DEFAULT NULL AFTER exam_term");
+            // Backfill existing rows with current year
+            db()->exec("UPDATE results SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1)");
+            // Update unique key
+            try {
+                db()->exec("ALTER TABLE results DROP INDEX uniq_result");
+                db()->exec("ALTER TABLE results ADD UNIQUE KEY uniq_result (student_id, subject_id, exam_term, year_id)");
+            } catch (Throwable $e) {
+                $results[] = '⚠ Could not update results unique key: ' . htmlspecialchars($e->getMessage());
+            }
+            $results[] = '✓ Added <code>results.year_id</code> column + back-filled existing rows';
+        }
+
+        // ── teachers.subject_id column
+        if (tableExists('teachers') && !columnExists('teachers', 'subject_id')) {
+            db()->exec("ALTER TABLE teachers ADD COLUMN subject_id INT DEFAULT NULL AFTER subject");
+            $results[] = '✓ Added <code>teachers.subject_id</code> column';
+        }
+
         // ── extracurricular
         if (!tableExists('extracurricular')) {
             db()->exec("CREATE TABLE extracurricular (
@@ -213,6 +267,7 @@ if (!db_ok()) {
             'home_show_calendar'        => '1',
             'home_show_anthem'          => '1',
             'home_show_links'           => '1',
+            'current_year_id'           => (string)(current_year_id() ?: ''),
         ];
         $ins = db()->prepare('INSERT IGNORE INTO settings (`key`,`value`) VALUES (?,?)');
         $added = 0;

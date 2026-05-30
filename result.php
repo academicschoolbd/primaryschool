@@ -4,6 +4,8 @@ $activeMenu = 'academic';
 require_once __DIR__ . '/includes/public_header.php';
 
 $classNames = [];
+$years = all_years();
+$curYear = current_year_id();
 if (db_ok()) {
     $classNames = db()->query("SELECT DISTINCT name FROM classes ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
 }
@@ -38,6 +40,21 @@ if (db_ok()) {
             <div class="t2-card-body">
                 <form id="resultForm" novalidate>
                     <div class="row g-3">
+                        <div class="col-md-6 col-lg-3">
+                            <label class="rs-label">
+                                <i class="fa fa-calendar-alt"></i> শিক্ষাবর্ষ
+                            </label>
+                            <select class="rs-select" id="resYear" name="year_id">
+                                <?php foreach ($years as $y): ?>
+                                <option value="<?= $y['id'] ?>" <?= $y['id']==$curYear?'selected':'' ?>>
+                                    <?= e($y['name']) ?><?= $y['is_current'] ? ' (চলমান)' : '' ?>
+                                </option>
+                                <?php endforeach; ?>
+                                <?php if (!$years): ?>
+                                <option value=""><?= e(date('Y')) ?> (বর্তমান)</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
                         <div class="col-md-6 col-lg-3">
                             <label class="rs-label">
                                 <i class="fa fa-school"></i> শ্রেণী <span class="req">*</span>
@@ -115,7 +132,7 @@ if (db_ok()) {
                 <div class="ms-band-meta">
                     <div class="ms-band-tag">MARKSHEET</div>
                     <div class="ms-band-term" data-bind="term.label_bn"></div>
-                    <div class="ms-band-year" data-bind="issued_year"></div>
+                    <div class="ms-band-year" data-bind="academic_year.name"></div>
                 </div>
             </div>
         </div>
@@ -225,6 +242,7 @@ if (db_ok()) {
         return ROLL_PREFIX + raw;
     }
     const term     = document.getElementById('resTerm');
+    const yearSel  = document.getElementById('resYear');
     const submit   = form.querySelector('button[type=submit]');
     const area     = document.getElementById('resultArea');
     const tpl      = document.getElementById('resultTpl');
@@ -303,7 +321,8 @@ if (db_ok()) {
         const params = new URLSearchParams({
             class_id:  sec.value,
             roll_no:   fullRollNo(),
-            exam_term: term.value
+            exam_term: term.value,
+            year_id:   yearSel ? yearSel.value : ''
         });
 
         try {

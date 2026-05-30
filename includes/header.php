@@ -84,8 +84,14 @@ window.APP = {
 
         <div class="menu-label">Academic</div>
         <nav>
+            <a href="years.php" class="<?= $current === 'years' ? 'active' : '' ?>">
+                <i class="bi bi-calendar3"></i> Academic Years
+            </a>
             <a href="results.php" class="<?= $current === 'results' ? 'active' : '' ?>">
                 <i class="bi bi-clipboard-data-fill"></i> Results
+            </a>
+            <a href="mark_entry.php" class="<?= $current === 'mark_entry' ? 'active' : '' ?>">
+                <i class="bi bi-pencil-square"></i> Mark Entry (subject)
             </a>
             <a href="marksheet.php" class="<?= $current === 'marksheet' ? 'active' : '' ?>">
                 <i class="bi bi-file-earmark-text-fill"></i> Marksheet
@@ -97,6 +103,9 @@ window.APP = {
         <nav>
             <a href="settings.php" class="<?= $current === 'settings' ? 'active' : '' ?>">
                 <i class="bi bi-palette-fill"></i> Theme &amp; Settings
+            </a>
+            <a href="audit.php" class="<?= $current === 'audit' ? 'active' : '' ?>">
+                <i class="bi bi-shield-fill-check"></i> Audit Log
             </a>
             <a href="<?= BASE_URL ?>/" target="_blank">
                 <i class="bi bi-globe2"></i> View Public Site

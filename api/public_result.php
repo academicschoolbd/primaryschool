@@ -52,6 +52,10 @@ if (!$student) {
     json_err('No student found with that class, section and roll number.', 404);
 }
 
+// Determine the year — explicit param, or fall back to current
+$reqYear = (int)($_GET['year_id'] ?? 0);
+$yearId  = $reqYear ?: (int)current_year_id();
+
 // Marks for every subject (left join so missing subjects show 0)
 $stmt = db()->prepare("
     SELECT sb.id, sb.name, sb.full_marks, sb.pass_marks,
@@ -60,9 +64,10 @@ $stmt = db()->prepare("
     FROM subjects sb
     LEFT JOIN results r ON r.subject_id = sb.id
                        AND r.student_id = ? AND r.exam_term = ?
+                       AND (? = 0 OR r.year_id = ? OR r.year_id IS NULL)
     ORDER BY sb.id
 ");
-$stmt->execute([(int)$student['id'], $term]);
+$stmt->execute([(int)$student['id'], $term, $yearId, $yearId]);
 $subjects = $stmt->fetchAll();
 
 // Make sure at least one subject has a real result entry; otherwise tell the user
@@ -131,6 +136,10 @@ json_ok([
     'term' => [
         'code'      => $term,
         'label_bn'  => bn_term($term),
+    ],
+    'academic_year' => [
+        'id'   => $yearId ?: null,
+        'name' => $yearId ? (string)(db()->query('SELECT name FROM academic_years WHERE id=' . (int)$yearId)->fetchColumn() ?: '') : null,
     ],
     'subjects' => $subjectsOut,
     'summary' => [

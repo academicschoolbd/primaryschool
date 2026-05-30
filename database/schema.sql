@@ -320,3 +320,47 @@ INSERT INTO extracurricular (name, image, sort_order) VALUES
 ('Red Crescent',    'https://picsum.photos/seed/bdrcs/400/200',  4),
 ('Debate Club',     'https://picsum.photos/seed/debate/400/200', 5),
 ('Music Club',      'https://picsum.photos/seed/music/400/200',  6);
+
+
+
+-- ==== Academic years (year-aware result tagging) ====
+DROP TABLE IF EXISTS academic_years;
+CREATE TABLE academic_years (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    is_current TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_year (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO academic_years (name, start_date, end_date, is_current) VALUES
+('2025', '2025-01-01', '2025-12-31', 0),
+('2026', '2026-01-01', '2026-12-31', 1),
+('2027', '2027-01-01', '2027-12-31', 0);
+
+-- ==== Audit log (anti-fraud history trail) ====
+DROP TABLE IF EXISTS audit_log;
+CREATE TABLE audit_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT, user_name VARCHAR(120), user_role VARCHAR(40),
+    action VARCHAR(40) NOT NULL,
+    entity_type VARCHAR(40) NOT NULL,
+    entity_id INT, entity_label VARCHAR(255),
+    changes_json MEDIUMTEXT,
+    ip_address VARCHAR(45), user_agent VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_entity (entity_type, entity_id),
+    INDEX idx_user (user_id), INDEX idx_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE results ADD COLUMN year_id INT DEFAULT NULL AFTER exam_term;
+ALTER TABLE results DROP INDEX uniq_result;
+ALTER TABLE results ADD UNIQUE KEY uniq_result (student_id, subject_id, exam_term, year_id);
+UPDATE results SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1);
+
+ALTER TABLE teachers ADD COLUMN subject_id INT DEFAULT NULL AFTER subject;
+
+INSERT INTO settings (`key`,`value`) VALUES
+('current_year_id', (SELECT CAST(id AS CHAR) FROM academic_years WHERE is_current=1 LIMIT 1));

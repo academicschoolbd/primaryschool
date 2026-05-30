@@ -362,3 +362,122 @@ function slugify($s) {
     $s = trim(strtolower($s), '-');
     return $s ?: 'page';
 }
+
+
+
+// ====================================================================
+// Academic year + audit log helpers
+// ====================================================================
+
+function ensure_year_tables() {
+    if (!db_ok()) return false;
+    try {
+        db()->exec("CREATE TABLE IF NOT EXISTS academic_years (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(40) NOT NULL,
+            start_date DATE, end_date DATE,
+            is_current TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_year (name)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $count = (int)db()->query('SELECT COUNT(*) FROM academic_years')->fetchColumn();
+        if ($count === 0) {
+            $y = (int)date('Y');
+            db()->prepare('INSERT INTO academic_years (name,start_date,end_date,is_current) VALUES (?,?,?,1)')
+                ->execute([(string)$y, "$y-01-01", "$y-12-31"]);
+        }
+        return true;
+    } catch (Throwable $e) { return false; }
+}
+
+function current_year_id() {
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    if (!db_ok()) return null;
+    try {
+        $cache = (int)db()->query('SELECT id FROM academic_years WHERE is_current=1 LIMIT 1')->fetchColumn();
+        if (!$cache) $cache = (int)db()->query('SELECT id FROM academic_years ORDER BY id DESC LIMIT 1')->fetchColumn();
+        return $cache ?: null;
+    } catch (Throwable $e) { ensure_year_tables(); return null; }
+}
+
+function current_year_name() {
+    $id = current_year_id();
+    if (!$id || !db_ok()) return (string)date('Y');
+    try {
+        $stmt = db()->prepare('SELECT name FROM academic_years WHERE id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn() ?: (string)date('Y');
+    } catch (Throwable $e) { return (string)date('Y'); }
+}
+
+function all_years() {
+    if (!db_ok()) return [];
+    try {
+        return db()->query('SELECT id, name, is_current FROM academic_years ORDER BY name DESC')->fetchAll();
+    } catch (Throwable $e) { ensure_year_tables(); return []; }
+}
+
+function ensure_audit_table() {
+    if (!db_ok()) return false;
+    try {
+        db()->exec("CREATE TABLE IF NOT EXISTS audit_log (
+            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT, user_name VARCHAR(120), user_role VARCHAR(40),
+            action VARCHAR(40) NOT NULL,
+            entity_type VARCHAR(40) NOT NULL,
+            entity_id INT, entity_label VARCHAR(255),
+            changes_json MEDIUMTEXT,
+            ip_address VARCHAR(45), user_agent VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_entity (entity_type, entity_id),
+            INDEX idx_user (user_id), INDEX idx_created (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        return true;
+    } catch (Throwable $e) { return false; }
+}
+
+/**
+ * Append an entry to the audit log. Auto-creates table if missing. Never throws.
+ */
+function audit_log($action, $entity_type, $entity_id = null, $entity_label = '', $before = null, $after = null) {
+    if (!db_ok()) return;
+    static $tableEnsured = false;
+    if (!$tableEnsured) { ensure_audit_table(); $tableEnsured = true; }
+
+    $u = current_user();
+    $changes = ($before !== null || $after !== null)
+        ? json_encode(['before' => $before, 'after' => $after], JSON_UNESCAPED_UNICODE)
+        : null;
+    $sql = 'INSERT INTO audit_log (user_id,user_name,user_role,action,entity_type,entity_id,entity_label,changes_json,ip_address,user_agent) VALUES (?,?,?,?,?,?,?,?,?,?)';
+    $args = [
+        $u['id'] ?? null,
+        $u['name'] ?? null,
+        $u['role'] ?? null,
+        $action, $entity_type, $entity_id,
+        mb_strimwidth((string)$entity_label, 0, 250, '…'),
+        $changes,
+        $_SERVER['REMOTE_ADDR'] ?? null,
+        mb_strimwidth($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 250, '…'),
+    ];
+    try { db()->prepare($sql)->execute($args); }
+    catch (Throwable $e) {
+        if ((int)($e->errorInfo[1] ?? 0) === 1146) {
+            ensure_audit_table();
+            try { db()->prepare($sql)->execute($args); } catch (Throwable $e2) {}
+        }
+    }
+}
+
+/** Compute the diff between two arrays (only changed keys). */
+function diff_changed($before, $after) {
+    if (!is_array($before) || !is_array($after)) return ['before' => $before, 'after' => $after];
+    $b = $a = [];
+    foreach ($after as $k => $v) {
+        if (!array_key_exists($k, $before) || (string)($before[$k] ?? '') !== (string)$v) {
+            $b[$k] = $before[$k] ?? null;
+            $a[$k] = $v;
+        }
+    }
+    return ['before' => $b, 'after' => $a];
+}
