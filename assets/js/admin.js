@@ -53,6 +53,7 @@
     // ---------- Fetch wrapper ----------
     async function api(url, opts = {}) {
         opts.headers = Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, opts.headers || {});
+        opts.credentials = opts.credentials || 'same-origin';
         if (opts.body && !(opts.body instanceof FormData) && typeof opts.body === 'object') {
             opts.body = new URLSearchParams(opts.body).toString();
             opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -221,8 +222,14 @@
     function bindThemeForm() {
         const form = document.getElementById('themeForm');
         if (!form) return;
-        const primary = form.querySelector('[name=theme_primary]');
-        const accent  = form.querySelector('[name=theme_accent]');
+        const primary = form.querySelector('input[name="theme_primary"]');
+        const accent  = form.querySelector('input[name="theme_accent"]');
+        if (!primary || !accent) {
+            console.warn('[Theme] missing color inputs — falling back to native form submit');
+            return;
+        }
+        // Validate on the client side too so the AJAX never sends a garbage value
+        const hexRe = /^#[0-9a-fA-F]{6}$/;
         const liveUpdate = () => applyTheme(primary.value, accent.value);
         primary.addEventListener('input', liveUpdate);
         accent.addEventListener('input',  liveUpdate);
@@ -240,7 +247,13 @@
 
         form.addEventListener('submit', async ev => {
             ev.preventDefault();
+            // Client-side hex validation
+            if (!hexRe.test(primary.value) || !hexRe.test(accent.value)) {
+                Toast.error('Invalid color value — must be #rrggbb.');
+                return;
+            }
             const btn = form.querySelector('button[type=submit]');
+            const oldHtml = btn.innerHTML;
             btn.classList.add('is-loading');
             btn.innerHTML = '<span class="spinner"></span> Saving…';
             try {
@@ -250,10 +263,22 @@
                 });
                 Toast.success(r.msg || 'Theme saved.');
             } catch (e) {
-                Toast.error(e.message);
+                console.error('[Theme] AJAX save failed:', e);
+                Toast.error(e.message || 'Save failed — falling back to page submit.');
+                // Fallback: submit form natively to settings.php?form=theme
+                setTimeout(() => {
+                    if (!form.querySelector('input[name="form"]')) {
+                        const h = document.createElement('input');
+                        h.type = 'hidden'; h.name = 'form'; h.value = 'theme';
+                        form.appendChild(h);
+                    }
+                    form.action  = location.pathname;
+                    form.method  = 'post';
+                    form.submit();
+                }, 800);
             } finally {
                 btn.classList.remove('is-loading');
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Theme';
+                btn.innerHTML = oldHtml || '<i class="bi bi-check-lg"></i> Save Theme';
             }
         });
     }

@@ -9,6 +9,21 @@ if (($user['role'] ?? '') !== 'admin') {
     redirect('index.php');
 }
 
+// === Handle theme save (fallback for when AJAX fails — same payload as /api/settings_save.php) ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'theme' && db_ok()) {
+    $primary = trim($_POST['theme_primary'] ?? '');
+    $accent  = trim($_POST['theme_accent']  ?? '');
+    $hex = '/^#[0-9a-fA-F]{6}$/';
+    if (!preg_match($hex, $primary) || !preg_match($hex, $accent)) {
+        flash_set('error', 'Invalid color value — must be #rrggbb.');
+    } else {
+        set_setting('theme_primary', $primary);
+        set_setting('theme_accent',  $accent);
+        flash_set('success', 'Theme saved (fallback path).');
+    }
+    redirect('settings.php');
+}
+
 // === Handle visibility / floating settings save ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site_visibility' && db_ok()) {
     $toggles = [
@@ -102,6 +117,7 @@ $presets = [
             </p>
 
             <form id="themeForm">
+                <input type="hidden" name="form" value="theme">
                 <div class="swatch-row">
                     <div id="chipPrimary" class="swatch-chip" style="background:<?= e($theme_primary) ?>;"></div>
                     <div class="meta" style="flex:1;">

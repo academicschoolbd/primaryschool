@@ -101,6 +101,36 @@ window.addEventListener('scroll', () => {
     document.getElementById('backToTop')?.classList.toggle('show', window.scrollY > 300);
 });
 
+// ============ Site-wide "Coming soon" toast for placeholder links ============
+// Catches any <a href="#"> on any public page (homepage, students.php, teachers.php,
+// result.php, notices.php) so visitors never see a broken-looking nav item.
+function publicToast(msg, type = 'info') {
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+        background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;
+        padding:12px 22px;border-radius:99px;box-shadow:0 8px 24px rgba(26,35,126,.35);
+        z-index:10000;font-size:14px;font-weight:600;opacity:0;transition:.25s;
+        display:flex;align-items:center;gap:8px;max-width:90vw;`;
+    t.innerHTML = '<i class="fa fa-info-circle" style="color:var(--accent);"></i><span>' + msg + '</span>';
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+document.addEventListener('click', function(e) {
+    const a = e.target.closest('a[href="#"]');
+    if (!a) return;
+    if (a.classList.contains('has-drop')) return;          // nav dropdown toggles
+    if (a.closest('.t2-marquee-content')) return;           // marquee already-real notice links
+    if (a.closest('.t2-dropdown li')) {
+        // Dropdown placeholder items inside the public nav — show toast
+        e.preventDefault();
+        publicToast('শীঘ্রই আসছে — এই ফিচারটি এখনো প্রস্তুত হয়নি।', 'info');
+        return;
+    }
+    e.preventDefault();
+    publicToast('শীঘ্রই আসছে — এই ফিচারটি এখনো প্রস্তুত হয়নি।', 'info');
+});
+
 // ============ Animated counter on stats ============
 function animateCounter(el, target) {
     const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
