@@ -81,11 +81,36 @@ function get_setting($key, $default = null) {
     return array_key_exists($key, $cache) ? $cache[$key] : $default;
 }
 
+/** Make sure the `settings` table exists (auto-creates on first use, so old DBs self-heal). */
+function ensure_settings_table() {
+    if (!db_ok()) return false;
+    try {
+        db()->exec("CREATE TABLE IF NOT EXISTS settings (
+            `key`   VARCHAR(64) PRIMARY KEY,
+            `value` TEXT
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        return true;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
 function set_setting($key, $value) {
     if (!db_ok()) return false;
     $sql = 'INSERT INTO settings (`key`,`value`) VALUES (?,?) '
          . 'ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)';
-    return db()->prepare($sql)->execute([$key, (string)$value]);
+    try {
+        return db()->prepare($sql)->execute([$key, (string)$value]);
+    } catch (PDOException $e) {
+        // Auto-heal: missing settings table (SQLSTATE 42S02 / MySQL 1146)
+        $code = $e->errorInfo[1] ?? null;
+        if ($e->getCode() === '42S02' || $code === 1146) {
+            if (ensure_settings_table()) {
+                return db()->prepare($sql)->execute([$key, (string)$value]);
+            }
+        }
+        throw $e;
+    }
 }
 
 // ====================================================================
