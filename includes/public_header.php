@@ -19,7 +19,7 @@ if (db_ok()) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1a237e">
+<meta name="theme-color" content="<?= e(get_setting('theme_primary', '#1a237e')) ?>">
 <title><?= e($pageTitle) ?> | <?= e($school['name_bn']) ?></title>
 <meta name="description" content="<?= e($school['name_en']) ?> – <?= e($school['address']) ?>">
 <link rel="icon" type="image/png" href="<?= e($school['logo']) ?>">

@@ -529,7 +529,7 @@ $bnMonths = bn_months_arr();
                             <div class="t2-hotline-items">
                                 <a href="<?= ADMIN_URL ?>/login.php" class="t2-hotline-item" style="background:#eef0fb;border-left-color:#3949ab;">
                                     <i class="fa fa-id-card" style="color:#3949ab;"></i>
-                                    <span style="color:#1a237e;font-weight:700;">এডমিন প্যানেল লগইন</span>
+                                    <span style="color:var(--primary);font-weight:700;">এডমিন প্যানেল লগইন</span>
                                     <i class="fa fa-external-link-alt ms-auto" style="font-size:12px;color:var(--text-muted);"></i>
                                 </a>
                                 <?php
