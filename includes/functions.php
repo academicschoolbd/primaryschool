@@ -61,3 +61,176 @@ function avatar_color($name) {
     $palette = ['#4f46e5','#8b5cf6','#10b981','#0ea5e9','#f59e0b','#ef4444','#ec4899'];
     return $palette[abs(crc32($name)) % count($palette)];
 }
+
+
+// ====================================================================
+// Settings helpers (key/value store, used for theme + global preferences)
+// ====================================================================
+
+function get_setting($key, $default = null) {
+    static $cache = null;
+    if ($cache === null) {
+        $cache = [];
+        if (db_ok()) {
+            try {
+                $rows = db()->query('SELECT `key`,`value` FROM settings')->fetchAll();
+                foreach ($rows as $r) $cache[$r['key']] = $r['value'];
+            } catch (Throwable $e) { /* table may not exist yet */ }
+        }
+    }
+    return array_key_exists($key, $cache) ? $cache[$key] : $default;
+}
+
+function set_setting($key, $value) {
+    if (!db_ok()) return false;
+    $sql = 'INSERT INTO settings (`key`,`value`) VALUES (?,?) '
+         . 'ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)';
+    return db()->prepare($sql)->execute([$key, (string)$value]);
+}
+
+// ====================================================================
+// Color helpers
+// ====================================================================
+
+/**
+ * Adjust a hex color's lightness. $amount in -100..+100.
+ * Negative = darker, positive = lighter.
+ */
+function adjust_color($hex, $amount) {
+    $hex = ltrim((string)$hex, '#');
+    if (strlen($hex) === 3) $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '#' . $hex;
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    $delta = (int) round(255 * $amount / 100);
+    $r = max(0, min(255, $r + $delta));
+    $g = max(0, min(255, $g + $delta));
+    $b = max(0, min(255, $b + $delta));
+    return sprintf('#%02x%02x%02x', $r, $g, $b);
+}
+
+/** Convert hex to "r,g,b" string for use in rgba() */
+function hex_to_rgb_str($hex) {
+    $hex = ltrim((string)$hex, '#');
+    if (strlen($hex) === 3) $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '79,70,229';
+    return hexdec(substr($hex, 0, 2)) . ',' . hexdec(substr($hex, 2, 2)) . ',' . hexdec(substr($hex, 4, 2));
+}
+
+/**
+ * Build a {--primary, --primary-light, ...} dictionary derived from the two
+ * configurable colors, plus accent. Used to inject the theme on every page.
+ */
+function theme_palette() {
+    $primary = get_setting('theme_primary', '#1a237e');
+    $accent  = get_setting('theme_accent',  '#f9a825');
+    return [
+        '--primary'        => $primary,
+        '--primary-light'  => adjust_color($primary, +12),
+        '--primary-dark'   => adjust_color($primary, -10),
+        '--primary-rgb'    => hex_to_rgb_str($primary),
+        '--accent'         => $accent,
+        '--accent-light'   => adjust_color($accent, +10),
+        '--accent-dark'    => adjust_color($accent, -15),
+        '--accent-rgb'     => hex_to_rgb_str($accent),
+    ];
+}
+
+/**
+ * Output a <style>:root{...}</style> block so saved theme colors override
+ * the defaults in style.css / public.css. Call inside <head>.
+ */
+function theme_styles_inline() {
+    $vars = theme_palette();
+    $out = ':root{';
+    foreach ($vars as $k => $v) $out .= $k . ':' . $v . ';';
+    $out .= '}';
+    echo '<style id="theme-vars">' . $out . '</style>';
+}
+
+// ====================================================================
+// File upload helper
+// ====================================================================
+
+/**
+ * Handle a single file upload. Returns the stored relative path
+ * (e.g. 'assets/uploads/teachers/abc123.jpg') or null on no upload / error.
+ *
+ * @param string $field  $_FILES key
+ * @param string $subdir relative subdir under assets/uploads/
+ * @param string $prefix filename prefix
+ */
+function upload_photo($field, $subdir = 'misc', $prefix = 'img') {
+    if (empty($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) return null;
+    $f = $_FILES[$field];
+    if ($f['error'] !== UPLOAD_ERR_OK) {
+        flash_set('error', 'Upload failed (code ' . $f['error'] . ').');
+        return null;
+    }
+    if ($f['size'] > 4 * 1024 * 1024) {
+        flash_set('error', 'Photo too large (max 4 MB).');
+        return null;
+    }
+    $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($f['tmp_name']);
+    if (!in_array($mime, $allowed, true)) {
+        flash_set('error', 'Only JPG, PNG, GIF, or WEBP images allowed.');
+        return null;
+    }
+    $extMap = ['image/jpeg'=>'jpg','image/png'=>'png','image/gif'=>'gif','image/webp'=>'webp'];
+    $ext = $extMap[$mime];
+    $dir = __DIR__ . '/../assets/uploads/' . trim($subdir, '/');
+    if (!is_dir($dir)) @mkdir($dir, 0775, true);
+    $name = $prefix . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+    $dest = $dir . '/' . $name;
+    if (!move_uploaded_file($f['tmp_name'], $dest)) {
+        flash_set('error', 'Could not save uploaded file.');
+        return null;
+    }
+    return 'assets/uploads/' . trim($subdir, '/') . '/' . $name;
+}
+
+/** Resolve a stored upload path (may be a full URL or relative) to a usable URL. */
+function media_url($path) {
+    if (!$path) return '';
+    if (preg_match('/^https?:\/\//i', $path)) return $path;
+    return BASE_URL . '/' . ltrim($path, '/');
+}
+
+/** Delete a previously uploaded local file (no-op for remote URLs). */
+function delete_photo($path) {
+    if (!$path || preg_match('/^https?:\/\//i', $path)) return;
+    $abs = __DIR__ . '/../' . ltrim($path, '/');
+    if (is_file($abs)) @unlink($abs);
+}
+
+// ====================================================================
+// AJAX / JSON helpers
+// ====================================================================
+
+function is_ajax() {
+    return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+        && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+}
+
+function json_response($data, $status = 200) {
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function json_ok($data = [], $msg = null) {
+    json_response(['ok' => true] + ($msg ? ['msg' => $msg] : []) + ($data ? ['data' => $data] : []));
+}
+
+function json_err($msg, $status = 400) {
+    json_response(['ok' => false, 'msg' => $msg], $status);
+}
+
+/** For AJAX endpoints: ensure the user is logged in, else return JSON 401. */
+function require_ajax_login() {
+    if (empty($_SESSION['user'])) json_err('Unauthorized', 401);
+}

@@ -67,6 +67,7 @@ $bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
 <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public.css">
+<?php theme_styles_inline(); ?>
 </head>
 <body class="public" data-aos-easing="ease" data-aos-duration="700">
 

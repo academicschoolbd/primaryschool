@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS gallery;
 DROP TABLE IF EXISTS school_messages;
 DROP TABLE IF EXISTS notices;
 DROP TABLE IF EXISTS school_info;
+DROP TABLE IF EXISTS settings;
 
 -- Admin / staff login accounts
 CREATE TABLE users (
@@ -44,6 +45,8 @@ CREATE TABLE teachers (
     email VARCHAR(160) UNIQUE,
     phone VARCHAR(30),
     subject VARCHAR(80),
+    designation VARCHAR(120) DEFAULT NULL,
+    photo VARCHAR(255) DEFAULT NULL,
     gender ENUM('male','female','other') DEFAULT 'male',
     joined_on DATE,
     status ENUM('active','inactive') DEFAULT 'active'
@@ -133,13 +136,13 @@ CREATE TABLE sliders (
 ) ENGINE=InnoDB;
 
 -- ==== Sample data ====
-INSERT INTO teachers (name,email,phone,subject,gender,joined_on,status) VALUES
-('Sarah Johnson','sarah.j@school.test','555-0101','English','female','2022-04-12','active'),
-('Michael Brown','m.brown@school.test','555-0102','Mathematics','male','2021-08-01','active'),
-('Priya Sharma','priya.s@school.test','555-0103','Science','female','2023-01-15','active'),
-('David Wilson','d.wilson@school.test','555-0104','Social Studies','male','2020-09-10','active'),
-('Aisha Khan','aisha.k@school.test','555-0105','Computer','female','2024-02-20','active'),
-('Robert Miller','r.miller@school.test','555-0106','Physical Ed.','male','2019-06-05','inactive');
+INSERT INTO teachers (name,email,phone,subject,designation,photo,gender,joined_on,status) VALUES
+('Sarah Johnson','sarah.j@school.test','555-0101','English','Senior Teacher','https://placehold.co/200x200/1a237e/ffffff?text=SJ','female','2022-04-12','active'),
+('Michael Brown','m.brown@school.test','555-0102','Mathematics','Head of Department','https://placehold.co/200x200/283593/ffffff?text=MB','male','2021-08-01','active'),
+('Priya Sharma','priya.s@school.test','555-0103','Science','Senior Teacher','https://placehold.co/200x200/1a237e/ffffff?text=PS','female','2023-01-15','active'),
+('David Wilson','d.wilson@school.test','555-0104','Social Studies','Assistant Teacher','https://placehold.co/200x200/283593/ffffff?text=DW','male','2020-09-10','active'),
+('Aisha Khan','aisha.k@school.test','555-0105','Computer','Assistant Teacher','https://placehold.co/200x200/1a237e/ffffff?text=AK','female','2024-02-20','active'),
+('Robert Miller','r.miller@school.test','555-0106','Physical Ed.','Sports Coordinator','https://placehold.co/200x200/283593/ffffff?text=RM','male','2019-06-05','inactive');
 
 INSERT INTO classes (name,section,teacher_id,capacity) VALUES
 ('Grade 1','A',1,35),
@@ -228,3 +231,15 @@ INSERT INTO gallery (image, caption, sort_order) VALUES
 ('https://picsum.photos/seed/g4/600/400', 'শ্রেণীকক্ষ কার্যক্রম', 4),
 ('https://picsum.photos/seed/g5/600/400', 'কম্পিউটার ল্যাব', 5),
 ('https://picsum.photos/seed/g6/600/400', 'লাইব্রেরি', 6);
+
+
+
+-- ==== Settings (theme + global) ====
+CREATE TABLE settings (
+    `key`   VARCHAR(64) PRIMARY KEY,
+    `value` TEXT
+) ENGINE=InnoDB;
+
+INSERT INTO settings (`key`,`value`) VALUES
+('theme_primary', '#1a237e'),
+('theme_accent',  '#f9a825');

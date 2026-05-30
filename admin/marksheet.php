@@ -94,7 +94,7 @@ foreach ($rows as $r) if ($r['marks_obtained'] < $r['pass_marks']) { $failed = t
 <!-- Printable marksheet -->
 <div class="card" id="marksheet" style="padding:0;overflow:hidden;">
     <!-- Header band -->
-    <div style="background:linear-gradient(135deg,#4f46e5,#8b5cf6);color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;">
         <div style="display:flex;align-items:center;gap:14px;">
             <div style="width:56px;height:56px;background:rgba(255,255,255,.18);border-radius:14px;display:grid;place-items:center;font-size:26px;font-weight:800;">E</div>
             <div>

@@ -4,26 +4,36 @@ $current = basename($_SERVER['PHP_SELF'], '.php');
 $pageTitle = $pageTitle ?? 'Dashboard';
 $user = current_user();
 $initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
+$isAdmin = ($user['role'] ?? '') === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= htmlspecialchars($pageTitle) ?> · <?= APP_NAME ?></title>
+<title><?= e($pageTitle) ?> · <?= APP_NAME ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/style.css">
+<?php theme_styles_inline(); ?>
+<script>
+window.APP = {
+    base: <?= json_encode(BASE_URL) ?>,
+    admin: <?= json_encode(ADMIN_URL) ?>,
+    api:   <?= json_encode(BASE_URL . '/api') ?>
+};
+</script>
 </head>
 <body>
+<div class="toast-host" id="toastHost"></div>
 <div class="app">
     <aside class="sidebar" id="sidebar">
         <div class="brand">
             <div class="logo">E</div>
             <div>
                 <div><?= APP_NAME ?></div>
-                <div style="font-size:11px;color:#64748b;font-weight:400;">Admin Panel</div>
+                <div style="font-size:11px;opacity:.6;font-weight:400;">Admin Panel</div>
             </div>
         </div>
 
@@ -57,8 +67,20 @@ $initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
             </a>
         </nav>
 
+        <?php if ($isAdmin): ?>
+        <div class="menu-label">System</div>
+        <nav>
+            <a href="settings.php" class="<?= $current === 'settings' ? 'active' : '' ?>">
+                <i class="bi bi-palette-fill"></i> Theme &amp; Settings
+            </a>
+            <a href="<?= BASE_URL ?>/" target="_blank">
+                <i class="bi bi-globe2"></i> View Public Site
+            </a>
+        </nav>
+        <?php endif; ?>
+
         <div class="foot">
-            v1.0 · &copy; <?= date('Y') ?> <?= APP_NAME ?>
+            v1.1 · &copy; <?= date('Y') ?> <?= APP_NAME ?>
         </div>
     </aside>
 
@@ -76,10 +98,10 @@ $initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
                     <i class="bi bi-chat-left-dots"></i>
                 </a>
                 <div class="user">
-                    <div class="avatar"><?= htmlspecialchars($initials) ?></div>
+                    <div class="avatar"><?= e($initials) ?></div>
                     <div class="meta">
-                        <b><?= htmlspecialchars($user['name']) ?></b>
-                        <span><?= htmlspecialchars(ucfirst($user['role'])) ?></span>
+                        <b><?= e($user['name']) ?></b>
+                        <span><?= e(ucfirst($user['role'])) ?></span>
                     </div>
                     <a href="logout.php" class="icon-btn" title="Logout">
                         <i class="bi bi-box-arrow-right"></i>

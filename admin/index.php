@@ -160,7 +160,11 @@ $stats = [
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-const brand = '#4f46e5';
+// Read theme colors from CSS variables so the chart matches the saved theme.
+const cs = getComputedStyle(document.documentElement);
+const brand    = cs.getPropertyValue('--primary').trim() || '#1a237e';
+const brandRgb = cs.getPropertyValue('--primary-rgb').trim() || '26,35,126';
+const accent   = cs.getPropertyValue('--accent').trim() || '#f9a825';
 new Chart(document.getElementById('enrollChart'), {
     type: 'line',
     data: {
@@ -168,7 +172,7 @@ new Chart(document.getElementById('enrollChart'), {
         datasets: [{
             label: 'New students',
             data: <?= json_encode($enrollTrend['students']) ?>,
-            borderColor: brand, backgroundColor: 'rgba(79,70,229,.12)',
+            borderColor: brand, backgroundColor: 'rgba(' + brandRgb + ',.12)',
             fill: true, tension: .35, borderWidth: 2,
             pointBackgroundColor: brand, pointRadius: 4
         }]
@@ -187,7 +191,7 @@ new Chart(document.getElementById('gradeChart'), {
         labels: <?= json_encode(array_column($gradeDist, 'lbl')) ?>,
         datasets: [{
             data: <?= json_encode(array_map('intval', array_column($gradeDist, 'cnt'))) ?>,
-            backgroundColor: ['#4f46e5','#8b5cf6','#10b981','#f59e0b','#0ea5e9','#ec4899','#ef4444'],
+            backgroundColor: [brand, accent, '#10b981', '#0ea5e9', '#8b5cf6', '#ec4899', '#ef4444'],
             borderWidth: 0
         }]
     },
