@@ -131,18 +131,18 @@ $bnMonths = bn_months_arr();
                 <li>
                     <a href="javascript:void(0);" class="has-drop">প্রশাসনিক তথ্য <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="#">প্রধান শিক্ষকের তালিকা</a></li>
-                        <li><a href="#">শিক্ষক-শিক্ষিকার তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/teachers.php">প্রধান শিক্ষকের তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/teachers.php">শিক্ষক-শিক্ষিকার তালিকা</a></li>
                         <li><a href="#">কর্মচারী তালিকা</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="javascript:void(0);" class="has-drop">একাডেমিক <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="#">ছাত্র-ছাত্রীদের তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/students.php">ছাত্র-ছাত্রীদের তালিকা</a></li>
                         <li><a href="#">ক্লাস রুটিন</a></li>
                         <li><a href="#">পরীক্ষার রুটিন</a></li>
-                        <li><a href="#">পরীক্ষার ফলাফল</a></li>
+                        <li><a href="<?= BASE_URL ?>/result.php">পরীক্ষার ফলাফল</a></li>
                         <li><a href="#">সিলেবাস</a></li>
                     </ul>
                 </li>
@@ -270,9 +270,9 @@ $bnMonths = bn_months_arr();
                                     ['url' => '#',                              'icon' => 'fa-credit-card',       'color' => '#2e7d32', 'bg' => 'linear-gradient(135deg,#e8f5e9,#c8e6c9)', 'label' => 'বেতন পরিশোধ'],
                                     ['url' => '#',                              'icon' => 'fa-id-card',           'color' => '#283593', 'bg' => 'linear-gradient(135deg,#e8eaf6,#c5cae9)', 'label' => 'এডমিট কার্ড'],
                                     ['url' => '#',                              'icon' => 'fa-user-plus',         'color' => '#1565c0', 'bg' => 'linear-gradient(135deg,#e3f2fd,#bbdefb)', 'label' => 'অনলাইন ভর্তি'],
-                                    ['url' => ADMIN_URL.'/teachers.php',        'icon' => 'fa-chalkboard-teacher','color' => '#e65100', 'bg' => 'linear-gradient(135deg,#fff3e0,#ffe0b2)', 'label' => 'শিক্ষক তালিকা'],
-                                    ['url' => ADMIN_URL.'/students.php',        'icon' => 'fa-users',             'color' => '#c62828', 'bg' => 'linear-gradient(135deg,#fce4ec,#f8bbd0)', 'label' => 'শিক্ষার্থী তালিকা'],
-                                    ['url' => ADMIN_URL.'/results.php',         'icon' => 'fa-certificate',       'color' => '#00695c', 'bg' => 'linear-gradient(135deg,#e0f7fa,#b2ebf2)', 'label' => 'ফলাফল'],
+                                    ['url' => BASE_URL.'/teachers.php',         'icon' => 'fa-chalkboard-teacher','color' => '#e65100', 'bg' => 'linear-gradient(135deg,#fff3e0,#ffe0b2)', 'label' => 'শিক্ষক তালিকা'],
+                                    ['url' => BASE_URL.'/students.php',         'icon' => 'fa-users',             'color' => '#c62828', 'bg' => 'linear-gradient(135deg,#fce4ec,#f8bbd0)', 'label' => 'শিক্ষার্থী তালিকা'],
+                                    ['url' => BASE_URL.'/result.php',           'icon' => 'fa-certificate',       'color' => '#00695c', 'bg' => 'linear-gradient(135deg,#e0f7fa,#b2ebf2)', 'label' => 'ফলাফল'],
                                     ['url' => '#',                              'icon' => 'fa-calendar-week',     'color' => '#6a1b9a', 'bg' => 'linear-gradient(135deg,#f3e5f5,#e1bee7)', 'label' => 'ক্লাস রুটিন'],
                                     ['url' => '#',                              'icon' => 'fa-file-alt',          'color' => '#f57f17', 'bg' => 'linear-gradient(135deg,#fff8e1,#ffecb3)', 'label' => 'পরীক্ষার রুটিন'],
                                 ];
@@ -294,7 +294,7 @@ $bnMonths = bn_months_arr();
                     <div class="t2-card mb-4" id="notices" data-aos="fade-up" data-aos-delay="100">
                         <div class="t2-card-header" style="justify-content:space-between;">
                             <span><i class="fa fa-clipboard-list"></i>নোটিশ বোর্ড</span>
-                            <a href="#" style="font-size:12px;color:var(--accent);font-weight:600;">
+                            <a href="<?= BASE_URL ?>/notices.php" style="font-size:12px;color:var(--accent);font-weight:600;">
                                 সকল দেখুন <i class="fa fa-arrow-right ms-1"></i>
                             </a>
                         </div>
@@ -314,7 +314,7 @@ $bnMonths = bn_months_arr();
                                         <div style="font-size:10px;"><?= $yr ?></div>
                                     </div>
                                     <div class="t2-notice-info">
-                                        <a href="#"><?= e($n['title']) ?></a>
+                                        <a href="<?= BASE_URL ?>/notices.php#n<?= (int)$n['id'] ?>"><?= e($n['title']) ?></a>
                                     </div>
                                 </li>
                                 <?php endforeach; ?>
@@ -344,7 +344,7 @@ $bnMonths = bn_months_arr();
                                         <div class="t2-msg-grid-name"><?= e($m['name']) ?></div>
                                         <div class="t2-msg-grid-desig"><?= e($m['designation']) ?></div>
                                         <div class="t2-msg-grid-text"><?= e($m['content']) ?></div>
-                                        <a href="#" class="t2-msg-grid-more">বিস্তারিত পড়ুন</a>
+                                        <a href="javascript:void(0);" class="t2-msg-grid-more" data-msg-full><?= e($m['name']) ?> · বিস্তারিত পড়ুন</a>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
@@ -368,13 +368,13 @@ $bnMonths = bn_months_arr();
                                     ]],
                                     ['head' => 'প্রশাসনিক তথ্য', 'icon' => 'fa-folder', 'links' => [
                                         ['#', 'প্রধান শিক্ষকের তালিকা'],
-                                        [ADMIN_URL.'/teachers.php', 'শিক্ষক-শিক্ষিকার তালিকা'],
+                                        [BASE_URL.'/teachers.php',  'শিক্ষক-শিক্ষিকার তালিকা'],
                                         ['#', 'কর্মচারী তালিকা'],
                                     ]],
                                     ['head' => 'একাডেমিক', 'icon' => 'fa-folder', 'links' => [
-                                        [ADMIN_URL.'/students.php', 'ছাত্র-ছাত্রীদের তালিকা'],
-                                        [ADMIN_URL.'/results.php',  'পরীক্ষার ফলাফল'],
-                                        [ADMIN_URL.'/marksheet.php','মার্কশীট'],
+                                        [BASE_URL.'/students.php',  'ছাত্র-ছাত্রীদের তালিকা'],
+                                        [BASE_URL.'/result.php',    'পরীক্ষার ফলাফল'],
+                                        [BASE_URL.'/result.php',    'মার্কশীট'],
                                         ['#', 'ক্লাস রুটিন'],
                                     ]],
                                     ['head' => 'ডাউনলোড', 'icon' => 'fa-folder', 'links' => [
@@ -595,9 +595,9 @@ $bnMonths = bn_months_arr();
                 <ul>
                     <li><a href="<?= BASE_URL ?>/">হোম</a></li>
                     <li><a href="#notices">নোটিশ বোর্ড</a></li>
-                    <li><a href="<?= ADMIN_URL ?>/teachers.php">শিক্ষক তালিকা</a></li>
-                    <li><a href="<?= ADMIN_URL ?>/students.php">শিক্ষার্থী তালিকা</a></li>
-                    <li><a href="<?= ADMIN_URL ?>/results.php">পরীক্ষার ফলাফল</a></li>
+                    <li><a href="<?= BASE_URL ?>/teachers.php">শিক্ষক তালিকা</a></li>
+                    <li><a href="<?= BASE_URL ?>/students.php">শিক্ষার্থী তালিকা</a></li>
+                    <li><a href="<?= BASE_URL ?>/result.php">পরীক্ষার ফলাফল</a></li>
                     <li><a href="#contact">যোগাযোগ</a></li>
                 </ul>
             </div>
@@ -713,6 +713,73 @@ function t2RenderCal() {
 function t2CalPrev(){ t2Month--; if(t2Month<0){t2Month=11;t2Year--;} t2RenderCal(); }
 function t2CalNext(){ t2Month++; if(t2Month>11){t2Month=0;t2Year++;} t2RenderCal(); }
 t2RenderCal();
+
+// ============ "Coming soon" toast for placeholder links ============
+function homeToast(msg, type = 'info') {
+    const colors = {
+        info:    'linear-gradient(135deg,var(--primary),var(--primary-light))',
+        success: 'linear-gradient(135deg,#047857,#10b981)',
+    };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+        background:${colors[type] || colors.info};color:#fff;padding:12px 22px;border-radius:99px;
+        box-shadow:0 8px 24px rgba(26,35,126,.35);z-index:10000;font-size:14px;font-weight:600;
+        opacity:0;transition:.25s;display:flex;align-items:center;gap:8px;max-width:90vw;`;
+    t.innerHTML = '<i class="fa fa-info-circle" style="color:var(--accent);"></i><span>' + msg + '</span>';
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+document.addEventListener('click', function(e) {
+    const a = e.target.closest('a[href="#"]');
+    if (!a) return;
+    if (a.classList.contains('has-drop')) return; // nav dropdowns toggle, don't intercept
+    if (a.closest('.t2-marquee-content')) return;
+    e.preventDefault();
+    homeToast('শীঘ্রই আসছে! এই ফিচারটি এখনো প্রস্তুত হয়নি।', 'info');
+});
+
+// ============ Leadership message full-text modal ============
+const msgData = <?= json_encode(array_map(function($m){
+    return ['name' => $m['name'], 'designation' => $m['designation'], 'photo' => $m['photo'], 'content' => $m['content']];
+}, $messages), JSON_UNESCAPED_UNICODE) ?>;
+document.querySelectorAll('[data-msg-full]').forEach((btn, idx) => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        const m = msgData[idx]; if (!m) return;
+        const safe = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        const html = `<div class="fn-overlay show" id="msgModal" style="z-index:10001;">
+            <div class="fn-modal" style="max-width:680px;">
+                <div class="fn-modal-head">
+                    <div class="icon"><i class="fa fa-comment-dots"></i></div>
+                    <div>
+                        <div class="label">বাণী ও শুভেচ্ছা</div>
+                        <div class="title-bn">${safe(m.name)}</div>
+                    </div>
+                    <button type="button" class="fn-modal-close"><i class="fa fa-times"></i></button>
+                </div>
+                <div class="fn-modal-body" style="text-align:center;">
+                    ${m.photo ? `<img src="${safe(m.photo)}" style="width:100px;height:120px;object-fit:cover;border-radius:8px;border:2px solid var(--border);margin-bottom:14px;">` : ''}
+                    <div style="font-weight:700;color:var(--primary);">${safe(m.name)}</div>
+                    <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">${safe(m.designation)}</div>
+                    <div style="text-align:justify;font-size:14px;line-height:1.8;color:var(--text-dark);">${safe(m.content)}</div>
+                </div>
+                <div class="fn-modal-actions">
+                    <button type="button" class="fn-btn fn-btn-light" data-close>বন্ধ করুন</button>
+                </div>
+            </div>
+        </div>`;
+        const wrap = document.createElement('div'); wrap.innerHTML = html;
+        const overlay = wrap.firstElementChild;
+        document.body.appendChild(overlay);
+        function close() { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 250); }
+        overlay.addEventListener('click', ev => {
+            if (ev.target === overlay) close();
+            if (ev.target.closest('.fn-modal-close,[data-close]')) close();
+        });
+        document.addEventListener('keydown', ev => { if (ev.key === 'Escape') close(); }, { once: true });
+    });
+});
 </script>
 </body>
 </html>
