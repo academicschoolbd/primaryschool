@@ -126,9 +126,9 @@ $bnMonths = bn_months_arr();
                     <a href="javascript:void(0);" class="has-drop">প্রতিষ্ঠান সম্পর্কিত <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
                         <li><a href="#about">প্রতিষ্ঠান সম্পর্কে</a></li>
-                        <li><a href="#">প্রতিষ্ঠাতা ও দানকারী</a></li>
-                        <li><a href="#">অনার বোর্ড</a></li>
-                        <li><a href="#">এনুয়াল রিপোর্ট</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=founder-donor-info">প্রতিষ্ঠাতা ও দানকারী</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=honor-board">অনার বোর্ড</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=annual-report">এনুয়াল রিপোর্ট</a></li>
                     </ul>
                 </li>
                 <li>
@@ -136,35 +136,35 @@ $bnMonths = bn_months_arr();
                     <ul class="t2-dropdown">
                         <li><a href="<?= BASE_URL ?>/teachers.php">প্রধান শিক্ষকের তালিকা</a></li>
                         <li><a href="<?= BASE_URL ?>/teachers.php">শিক্ষক-শিক্ষিকার তালিকা</a></li>
-                        <li><a href="#">কর্মচারী তালিকা</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=rules-regulations">কর্মচারী তালিকা</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="javascript:void(0);" class="has-drop">একাডেমিক <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
                         <li><a href="<?= BASE_URL ?>/students.php">ছাত্র-ছাত্রীদের তালিকা</a></li>
-                        <li><a href="#">ক্লাস রুটিন</a></li>
-                        <li><a href="#">পরীক্ষার রুটিন</a></li>
+                        <li><a href="<?= BASE_URL ?>/routine.php">ক্লাস রুটিন</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=exam-routine">পরীক্ষার রুটিন</a></li>
                         <li><a href="<?= BASE_URL ?>/result.php">পরীক্ষার ফলাফল</a></li>
-                        <li><a href="#">সিলেবাস</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=syllabus">সিলেবাস</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="javascript:void(0);" class="has-drop">তথ্যাবলী <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="#">ক্রীড়া ও সাংস্কৃতিক অনুষ্ঠান</a></li>
-                        <li><a href="#">উপবৃত্তি</a></li>
-                        <li><a href="#">আয়-ব্যয়ের হিসাব</a></li>
-                        <li><a href="#">হোস্টেলের তথ্য</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=admission">ক্রীড়া ও সাংস্কৃতিক অনুষ্ঠান</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=scholarship">উপবৃত্তি</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=fees-payment">আয়-ব্যয়ের হিসাব</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=hostel-information">হোস্টেলের তথ্য</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="javascript:void(0);" class="has-drop">ডাউনলোড <i class="fa fa-chevron-down"></i></a>
                     <ul class="t2-dropdown">
-                        <li><a href="#">ম্যানুয়েল</a></li>
-                        <li><a href="#">ই-বুক</a></li>
-                        <li><a href="#">লেকচার শীট</a></li>
-                        <li><a href="#">ফর্ম</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=manual">ম্যানুয়েল</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=e-book">ই-বুক</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=e-book">লেকচার শীট</a></li>
+                        <li><a href="<?= BASE_URL ?>/page.php?slug=admission">ফর্ম</a></li>
                     </ul>
                 </li>
                 <li><a href="#notices">নোটিশ</a></li>
@@ -270,14 +270,14 @@ $bnMonths = bn_months_arr();
                             <div class="t2-quick-grid">
                                 <?php
                                 $quick = [
-                                    ['url' => '#',                              'icon' => 'fa-credit-card',       'color' => '#2e7d32', 'bg' => 'linear-gradient(135deg,#e8f5e9,#c8e6c9)', 'label' => 'বেতন পরিশোধ'],
-                                    ['url' => '#',                              'icon' => 'fa-id-card',           'color' => '#283593', 'bg' => 'linear-gradient(135deg,#e8eaf6,#c5cae9)', 'label' => 'এডমিট কার্ড'],
-                                    ['url' => '#',                              'icon' => 'fa-user-plus',         'color' => '#1565c0', 'bg' => 'linear-gradient(135deg,#e3f2fd,#bbdefb)', 'label' => 'অনলাইন ভর্তি'],
+                                    ['url' => BASE_URL.'/page.php?slug=fees-payment', 'icon' => 'fa-credit-card',       'color' => '#2e7d32', 'bg' => 'linear-gradient(135deg,#e8f5e9,#c8e6c9)', 'label' => 'বেতন পরিশোধ'],
+                                    ['url' => BASE_URL.'/page.php?slug=admit-card',   'icon' => 'fa-id-card',           'color' => '#283593', 'bg' => 'linear-gradient(135deg,#e8eaf6,#c5cae9)', 'label' => 'এডমিট কার্ড'],
+                                    ['url' => BASE_URL.'/page.php?slug=admission',    'icon' => 'fa-user-plus',         'color' => '#1565c0', 'bg' => 'linear-gradient(135deg,#e3f2fd,#bbdefb)', 'label' => 'অনলাইন ভর্তি'],
                                     ['url' => BASE_URL.'/teachers.php',         'icon' => 'fa-chalkboard-teacher','color' => '#e65100', 'bg' => 'linear-gradient(135deg,#fff3e0,#ffe0b2)', 'label' => 'শিক্ষক তালিকা'],
                                     ['url' => BASE_URL.'/students.php',         'icon' => 'fa-users',             'color' => '#c62828', 'bg' => 'linear-gradient(135deg,#fce4ec,#f8bbd0)', 'label' => 'শিক্ষার্থী তালিকা'],
                                     ['url' => BASE_URL.'/result.php',           'icon' => 'fa-certificate',       'color' => '#00695c', 'bg' => 'linear-gradient(135deg,#e0f7fa,#b2ebf2)', 'label' => 'ফলাফল'],
-                                    ['url' => '#',                              'icon' => 'fa-calendar-week',     'color' => '#6a1b9a', 'bg' => 'linear-gradient(135deg,#f3e5f5,#e1bee7)', 'label' => 'ক্লাস রুটিন'],
-                                    ['url' => '#',                              'icon' => 'fa-file-alt',          'color' => '#f57f17', 'bg' => 'linear-gradient(135deg,#fff8e1,#ffecb3)', 'label' => 'পরীক্ষার রুটিন'],
+                                    ['url' => BASE_URL.'/routine.php',                'icon' => 'fa-calendar-week',     'color' => '#6a1b9a', 'bg' => 'linear-gradient(135deg,#f3e5f5,#e1bee7)', 'label' => 'ক্লাস রুটিন'],
+                                    ['url' => BASE_URL.'/page.php?slug=exam-routine', 'icon' => 'fa-file-alt',          'color' => '#f57f17', 'bg' => 'linear-gradient(135deg,#fff8e1,#ffecb3)', 'label' => 'পরীক্ষার রুটিন'],
                                 ];
                                 foreach ($quick as $q): ?>
                                 <a href="<?= e($q['url']) ?>" class="t2-quick-item">
@@ -369,26 +369,26 @@ $bnMonths = bn_months_arr();
                                 <?php
                                 $services = [
                                     ['head' => 'প্রতিষ্ঠান সম্পর্কিত', 'icon' => 'fa-folder', 'links' => [
-                                        ['#', 'প্রতিষ্ঠান সম্পর্কে'],
-                                        ['#', 'অনার বোর্ড'],
-                                        ['#', 'প্রতিষ্ঠাতা ও দানকারী'],
+                                        [BASE_URL.'/page.php?slug=about-institution',  'প্রতিষ্ঠান সম্পর্কে'],
+                                        [BASE_URL.'/page.php?slug=honor-board',        'অনার বোর্ড'],
+                                        [BASE_URL.'/page.php?slug=founder-donor-info', 'প্রতিষ্ঠাতা ও দানকারী'],
                                     ]],
                                     ['head' => 'প্রশাসনিক তথ্য', 'icon' => 'fa-folder', 'links' => [
-                                        ['#', 'প্রধান শিক্ষকের তালিকা'],
-                                        [BASE_URL.'/teachers.php',  'শিক্ষক-শিক্ষিকার তালিকা'],
-                                        ['#', 'কর্মচারী তালিকা'],
+                                        [BASE_URL.'/teachers.php',                      'প্রধান শিক্ষকের তালিকা'],
+                                        [BASE_URL.'/teachers.php',                      'শিক্ষক-শিক্ষিকার তালিকা'],
+                                        [BASE_URL.'/page.php?slug=rules-regulations',   'বিধি বিধান'],
                                     ]],
                                     ['head' => 'একাডেমিক', 'icon' => 'fa-folder', 'links' => [
-                                        [BASE_URL.'/students.php',  'ছাত্র-ছাত্রীদের তালিকা'],
-                                        [BASE_URL.'/result.php',    'পরীক্ষার ফলাফল'],
-                                        [BASE_URL.'/result.php',    'মার্কশীট'],
-                                        ['#', 'ক্লাস রুটিন'],
+                                        [BASE_URL.'/students.php',                      'ছাত্র-ছাত্রীদের তালিকা'],
+                                        [BASE_URL.'/result.php',                        'পরীক্ষার ফলাফল'],
+                                        [BASE_URL.'/result.php',                        'মার্কশীট'],
+                                        [BASE_URL.'/routine.php',                       'ক্লাস রুটিন'],
                                     ]],
                                     ['head' => 'ডাউনলোড', 'icon' => 'fa-folder', 'links' => [
-                                        ['#', 'ম্যানুয়েল'],
-                                        ['#', 'ই-বুক'],
-                                        ['#', 'লেকচার শীট'],
-                                        ['#', 'বুক লিস্ট'],
+                                        [BASE_URL.'/page.php?slug=manual',          'ম্যানুয়েল'],
+                                        [BASE_URL.'/page.php?slug=e-book',          'ই-বুক'],
+                                        [BASE_URL.'/page.php?slug=syllabus',        'সিলেবাস'],
+                                        [BASE_URL.'/page.php?slug=admit-card',      'এডমিট কার্ড'],
                                     ]],
                                 ];
                                 foreach ($services as $sv): ?>
@@ -618,10 +618,10 @@ $bnMonths = bn_months_arr();
                 <h5><i class="fa fa-star"></i>গুরুত্বপূর্ণ</h5>
                 <ul>
                     <li><a href="#about">প্রতিষ্ঠান সম্পর্কিত</a></li>
-                    <li><a href="#">প্রশাসনিক তথ্য</a></li>
-                    <li><a href="#">একাডেমিক তথ্য</a></li>
-                    <li><a href="#">তথ্যাবলী</a></li>
-                    <li><a href="#">ডাউনলোড</a></li>
+                    <li><a href="<?= BASE_URL ?>/teachers.php">প্রশাসনিক তথ্য</a></li>
+                    <li><a href="<?= BASE_URL ?>/result.php">একাডেমিক তথ্য</a></li>
+                    <li><a href="<?= BASE_URL ?>/page.php?slug=admission">তথ্যাবলী</a></li>
+                    <li><a href="<?= BASE_URL ?>/page.php?slug=manual">ডাউনলোড</a></li>
                     <li><a href="#gallery">ফটো গ্যালারী</a></li>
                 </ul>
             </div>
