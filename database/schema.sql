@@ -372,3 +372,39 @@ ALTER TABLE classes  ADD COLUMN year_id INT DEFAULT NULL AFTER capacity;
 ALTER TABLE students ADD COLUMN year_id INT DEFAULT NULL AFTER class_id;
 UPDATE classes  SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1);
 UPDATE students SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1);
+
+
+
+-- ==== Fees (structures + payments) ====
+DROP TABLE IF EXISTS fee_structures;
+CREATE TABLE fee_structures (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    class_id INT NOT NULL,
+    year_id INT,
+    fee_name VARCHAR(120) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    due_month TINYINT DEFAULT NULL COMMENT '1-12 for monthly fees, NULL for one-time',
+    is_recurring TINYINT(1) DEFAULT 0,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_class_year (class_id, year_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS fee_payments;
+CREATE TABLE fee_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    year_id INT,
+    fee_structure_id INT DEFAULT NULL,
+    fee_name VARCHAR(120),
+    amount DECIMAL(10,2) NOT NULL,
+    paid_on DATE NOT NULL,
+    method VARCHAR(40) DEFAULT 'cash',
+    note VARCHAR(255),
+    received_by INT,
+    receipt_no VARCHAR(40) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student (student_id),
+    INDEX idx_year (year_id),
+    INDEX idx_paid_on (paid_on)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

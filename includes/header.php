@@ -110,6 +110,16 @@ window.APP = {
             </a>
         </nav>
 
+        <div class="menu-label">Finance</div>
+        <nav>
+            <a href="fees.php" class="<?= $current === 'fees' ? 'active' : '' ?>">
+                <i class="bi bi-cash-stack"></i> Fee Structure
+            </a>
+            <a href="payments.php" class="<?= $current === 'payments' ? 'active' : '' ?>">
+                <i class="bi bi-cash-coin"></i> Record Payment
+            </a>
+        </nav>
+
         <?php if ($isAdmin): ?>
         <div class="menu-label">System</div>
         <nav>
@@ -118,6 +128,9 @@ window.APP = {
             </a>
             <a href="audit.php" class="<?= $current === 'audit' ? 'active' : '' ?>">
                 <i class="bi bi-shield-fill-check"></i> Audit Log
+            </a>
+            <a href="backup.php" class="<?= $current === 'backup' ? 'active' : '' ?>">
+                <i class="bi bi-cloud-download-fill"></i> Database Backup
             </a>
             <a href="<?= BASE_URL ?>/" target="_blank">
                 <i class="bi bi-globe2"></i> View Public Site
