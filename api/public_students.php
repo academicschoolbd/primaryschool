@@ -16,6 +16,7 @@ $gender  = $_GET['gender'] ?? '';
 $status  = $_GET['status'] ?? 'active';
 
 $where = []; $args = [];
+$yearId = (int)($_GET['year_id'] ?? 0);
 if ($status === 'active' || $status === 'inactive') {
     $where[] = 's.status = ?'; $args[] = $status;
 }
@@ -26,6 +27,9 @@ if ($classId) {
 }
 if (in_array($gender, ['male','female','other'], true)) {
     $where[] = 's.gender = ?'; $args[] = $gender;
+}
+if ($yearId) {
+    $where[] = 's.year_id = ?'; $args[] = $yearId;
 }
 
 $sql = "SELECT s.id, s.roll_no, s.name, s.gender, s.parent_name, s.photo,

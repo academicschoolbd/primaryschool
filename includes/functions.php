@@ -4,6 +4,8 @@
 function e($v) { return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8'); }
 
 function redirect($path) {
+    // Defensive: clean any buffered HTML output before sending Location header
+    while (ob_get_level() > 0) { ob_end_clean(); }
     header('Location: ' . $path);
     exit;
 }

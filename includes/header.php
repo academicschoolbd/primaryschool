@@ -96,6 +96,9 @@ window.APP = {
             <a href="marksheet.php" class="<?= $current === 'marksheet' ? 'active' : '' ?>">
                 <i class="bi bi-file-earmark-text-fill"></i> Marksheet
             </a>
+            <a href="promote.php" class="<?= $current === 'promote' ? 'active' : '' ?>">
+                <i class="bi bi-arrow-up-right-circle-fill"></i> Promote Students
+            </a>
         </nav>
 
         <?php if ($isAdmin): ?>

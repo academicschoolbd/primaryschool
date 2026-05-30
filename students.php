@@ -27,6 +27,17 @@ if (db_ok()) {
             <h5 class="section-title mb-4">শিক্ষার্থী অনুসন্ধান</h5>
             <div class="row g-3">
                 <div class="col-md-3 col-sm-6">
+                    <label>শিক্ষাবর্ষ</label>
+                    <select id="stYear">
+                        <?php foreach ($years as $y): ?>
+                        <option value="<?= $y['id'] ?>" <?= $y['id']==$curYear?'selected':'' ?>>
+                            <?= e($y['name']) ?><?= $y['is_current'] ? ' (চলমান)' : '' ?>
+                        </option>
+                        <?php endforeach; ?>
+                        <?php if (!$years): ?><option value=""><?= e(date('Y')) ?></option><?php endif; ?>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
                     <label>শ্রেণী</label>
                     <select id="stClass">
                         <option value="">— শ্রেণী বেছে নিন —</option>
@@ -80,6 +91,7 @@ if (db_ok()) {
     const sec    = document.getElementById('stSection');
     const gender = document.getElementById('stGender');
     const status = document.getElementById('stStatus');
+    const year   = document.getElementById('stYear');
     const btn    = document.getElementById('stSearch');
     const target = document.getElementById('stListContainer');
 
@@ -97,7 +109,8 @@ if (db_ok()) {
         sec.disabled = true;
         sec.innerHTML = '<option value="">লোড হচ্ছে...</option>';
         try {
-            const r = await fetch(window.APP.api + '/public_sections.php?class=' + encodeURIComponent(v));
+            const yp = year && year.value ? '&year_id=' + encodeURIComponent(year.value) : '';
+            const r = await fetch(window.APP.api + '/public_sections.php?class=' + encodeURIComponent(v) + yp);
             const j = await r.json();
             const opts = ['<option value="">সকল শাখা</option>'];
             (j.data || []).forEach(s => {
@@ -125,6 +138,7 @@ if (db_ok()) {
         else params.set('class', cls.value);
         if (gender.value) params.set('gender', gender.value);
         if (status.value) params.set('status', status.value);
+        if (year && year.value) params.set('year_id', year.value);
 
         try {
             const r = await fetch(window.APP.api + '/public_students.php?' + params.toString());

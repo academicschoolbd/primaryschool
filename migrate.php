@@ -226,6 +226,20 @@ if (!db_ok()) {
             $results[] = '✓ Added <code>teachers.subject_id</code> column';
         }
 
+        // ── classes.year_id column
+        if (tableExists('classes') && !columnExists('classes', 'year_id')) {
+            db()->exec("ALTER TABLE classes ADD COLUMN year_id INT DEFAULT NULL AFTER capacity");
+            db()->exec("UPDATE classes SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1)");
+            $results[] = '✓ Added <code>classes.year_id</code> column + back-filled to current year';
+        }
+
+        // ── students.year_id column
+        if (tableExists('students') && !columnExists('students', 'year_id')) {
+            db()->exec("ALTER TABLE students ADD COLUMN year_id INT DEFAULT NULL AFTER class_id");
+            db()->exec("UPDATE students SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1)");
+            $results[] = '✓ Added <code>students.year_id</code> column + back-filled to current year';
+        }
+
         // ── extracurricular
         if (!tableExists('extracurricular')) {
             db()->exec("CREATE TABLE extracurricular (

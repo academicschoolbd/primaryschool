@@ -7,8 +7,16 @@ $id     = (int)($_GET['id'] ?? 0);
 
 // Distinct class names (parent of cascade)
 $classNames = [];
+$yearOptions = all_years();
+$filterYear = (int)($_GET['filter_year'] ?? current_year_id() ?? 0);
 if (db_ok()) {
-    $classNames = db()->query("SELECT DISTINCT name FROM classes ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+    if ($filterYear) {
+        $stmt = db()->prepare("SELECT DISTINCT name FROM classes WHERE year_id = ? ORDER BY name");
+        $stmt->execute([$filterYear]);
+        $classNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } else {
+        $classNames = db()->query("SELECT DISTINCT name FROM classes ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+    }
 }
 
 // === Handle POST ===
@@ -23,10 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
         'phone'       => trim($_POST['phone'] ?? '') ?: null,
         'address'     => trim($_POST['address'] ?? '') ?: null,
         'status'      => $_POST['status'] ?? 'active',
+        'year_id'     => (int)($_POST['year_id'] ?? 0) ?: current_year_id(),
     ];
     try {
         if (!empty($_POST['id'])) {
-            $sql = 'UPDATE students SET roll_no=?,name=?,class_id=?,gender=?,dob=?,parent_name=?,phone=?,address=?,status=? WHERE id=?';
+            $sql = 'UPDATE students SET roll_no=?,name=?,class_id=?,gender=?,dob=?,parent_name=?,phone=?,address=?,status=?,year_id=? WHERE id=?';
             $sid = (int)$_POST['id'];
             // Audit: snapshot before
             $bs = db()->prepare('SELECT * FROM students WHERE id=?'); $bs->execute([$sid]); $before = $bs->fetch();
@@ -35,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
             audit_log('update', 'student', $sid, $data['name'] . ' (roll ' . $data['roll_no'] . ')', $diff['before'], $diff['after']);
             flash_set('success', 'Student updated.');
         } else {
-            $sql = 'INSERT INTO students (roll_no,name,class_id,gender,dob,parent_name,phone,address,status) VALUES (?,?,?,?,?,?,?,?,?)';
+            $sql = 'INSERT INTO students (roll_no,name,class_id,gender,dob,parent_name,phone,address,status,year_id) VALUES (?,?,?,?,?,?,?,?,?,?)';
             db()->prepare($sql)->execute(array_values($data));
             $newId = (int)db()->lastInsertId();
             audit_log('create', 'student', $newId, $data['name'] . ' (roll ' . $data['roll_no'] . ')', null, $data);
@@ -48,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
 }
 
 // === Load record for edit ===
-$record = ['id'=>'','roll_no'=>'','name'=>'','class_id'=>'','gender'=>'male','dob'=>'','parent_name'=>'','phone'=>'','address'=>'','status'=>'active'];
+$record = ['id'=>'','roll_no'=>'','name'=>'','class_id'=>'','gender'=>'male','dob'=>'','parent_name'=>'','phone'=>'','address'=>'','status'=>'active','year_id'=>current_year_id()];
 $recordClassName = '';  // for the cascade preselect
 if ($action === 'edit' && $id && db_ok()) {
     $stmt = db()->prepare('SELECT s.*, c.name AS cls_name FROM students s LEFT JOIN classes c ON c.id = s.class_id WHERE s.id = ?');
@@ -145,6 +154,16 @@ if ($action === 'edit' && $id && db_ok()) {
                     <option value="inactive" <?= $record['status']==='inactive'?'selected':'' ?>>Inactive</option>
                 </select>
             </div>
+            <div class="field">
+                <label>Academic Year <span style="color:#dc2626;">*</span></label>
+                <select name="year_id" required>
+                    <?php foreach ($yearOptions as $y): ?>
+                    <option value="<?= $y['id'] ?>" <?= (int)$record['year_id']===(int)$y['id']?'selected':'' ?>>
+                        <?= e($y['name']) ?><?= $y['is_current'] ? ' (current)' : '' ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
 
         <div style="margin-top:14px;display:flex;gap:10px;">
@@ -169,6 +188,16 @@ if ($action === 'edit' && $id && db_ok()) {
                    data-extra-fields=".filter-field"
                    data-renderer="renderStudentsRows"
                    placeholder="Search by name, roll no, parent…">
+
+            <select class="filter-field" name="year_id"
+                    style="padding:9px 12px;border:1px solid var(--line);border-radius:8px;">
+                <option value="">All years</option>
+                <?php foreach ($yearOptions as $y): ?>
+                <option value="<?= $y['id'] ?>" <?= $filterYear===(int)$y['id']?'selected':'' ?>>
+                    <?= e($y['name']) ?><?= $y['is_current'] ? ' (current)' : '' ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
 
             <!-- Cascading filter: Class name → Section -->
             <select class="filter-field" id="filterClass"
@@ -200,8 +229,11 @@ if ($action === 'edit' && $id && db_ok()) {
         <?php
         $students = db_ok()
             ? db()->query("
-                SELECT s.*, CONCAT(c.name,' - ',COALESCE(c.section,'')) AS class_label
-                FROM students s LEFT JOIN classes c ON c.id = s.class_id
+                SELECT s.*, CONCAT(c.name,' - ',COALESCE(c.section,'')) AS class_label, ay.name AS year_name
+                FROM students s
+                LEFT JOIN classes c          ON c.id = s.class_id
+                LEFT JOIN academic_years ay  ON ay.id = s.year_id
+                " . ($filterYear ? 'WHERE s.year_id = ' . (int)$filterYear : '') . "
                 ORDER BY s.id DESC
             ")->fetchAll()
             : [];

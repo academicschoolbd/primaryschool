@@ -9,6 +9,7 @@ $section  = trim($_GET['section'] ?? '');
 $classId  = (int)($_GET['class_id'] ?? 0);
 
 $where = []; $args = [];
+$yearId = (int)($_GET['year_id'] ?? 0);
 if ($q !== '') {
     $where[] = '(s.name LIKE ? OR s.roll_no LIKE ? OR s.parent_name LIKE ?)';
     array_push($args, "%$q%", "%$q%", "%$q%");
@@ -19,6 +20,7 @@ if ($classId) {
     if ($cls !== '')     { $where[] = 'c.name = ?';    $args[] = $cls; }
     if ($section !== '') { $where[] = 'c.section = ?'; $args[] = $section; }
 }
+if ($yearId) { $where[] = 's.year_id = ?'; $args[] = $yearId; }
 
 $sql = "SELECT s.*, CONCAT(c.name,' - ',COALESCE(c.section,'')) AS class_label
         FROM students s LEFT JOIN classes c ON c.id = s.class_id"

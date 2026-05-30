@@ -458,3 +458,63 @@ Run **`migrate.php`** once after pulling — it's safe and non-destructive. It w
 - Custom exam creator (replace `first/mid/final` enum with an `exams` table)
 - Real PDF compression via Ghostscript in `notices_save.php`
 - Replace plain-text-with-HTML CMS editor with Quill / TipTap rich text
+
+
+
+---
+
+## Year support across the app
+
+Every relevant table now carries a `year_id` so historical data is preserved as years roll over:
+
+| Table | Year column | Purpose |
+|---|---|---|
+| `academic_years` | (primary key) | Source of truth — one row per year, one flagged `is_current` |
+| `classes`        | `year_id` | A "Grade 5 - A" in 2026 is a different row from "Grade 5 - A" in 2025 |
+| `students`       | `year_id` | Enrollment year for that student record |
+| `results`        | `year_id` | Same student can have results in multiple years |
+| `settings`       | `current_year_id` | Mirror of the flagged row for fast reads |
+
+### Year-aware UX
+
+- **`/admin/years.php`** — CRUD for years; "Set as current" toggle auto-clears the flag on others
+- **`/admin/classes.php`** — year filter at top, year selector required when adding/editing
+- **`/admin/students.php`** — year filter, year selector in form, year column in list
+- **`/admin/mark_entry.php`** — year selector defaults to current; results saved with year_id
+- **`/admin/promote.php`** — bulk-promote active students from one year to another, each promotion audit-logged with before/after class+year
+- **`/result.php`** — public year selector defaults to current; mobile-app API accepts `year_id`
+- **`/students.php`** (public) — year selector defaults to current; cascading sections respect the chosen year
+- **All AJAX endpoints** (`students_search`, `sections`, `classes_search`, `public_students`, `public_sections`, `public_classes`, `public_result`) accept optional `year_id`
+
+### Workflow at year-end
+1. Admin → Academic Years → "Add Year" → e.g. `2027`
+2. Click "Set current" so all dropdowns + new entries default to 2027
+3. Admin → Classes → create classes for 2027 (Grade 1, Grade 2, … with their sections)
+4. Admin → Promote Students → from 2026, to 2027 → assign new class for each student → Save
+5. Each promotion appears in the Audit Log with before/after class_id + year_id
+
+---
+
+## What's still missing (roadmap)
+
+The following are NOT yet implemented; they're the most common asks for a school SaaS that we'll prioritize next:
+
+| Feature | Notes |
+|---|---|
+| **Attendance** | Daily attendance per student per class, AJAX grid like mark entry, auto-defaults to today + current year |
+| **Fees / Payments** | Fee structure per class+year, payment receipts, pending dues, online payment gateway hooks |
+| **Routine / Timetable** | Class routine with day+period grid, exam routine with rooms |
+| **ID cards / Admit cards** | Print-ready cards with photo, barcode/QR, school logo |
+| **Certificates** | Transfer certificate, character certificate, marksheet PDF generator |
+| **Parent / Student / Teacher login** | Separate login flows + dashboards (currently everyone uses admin login) |
+| **SMS notifications** | Bangladeshi SMS gateway integration (BulkSMSBD, SSL Wireless, etc.) |
+| **Library** | Books, issue/return, fines |
+| **Hostel** | Rooms, beds, fees |
+| **Transport** | Routes, vehicles, students per route |
+| **Subject ↔ Class mapping** | `class_subjects` table linking subjects taught in each class+year |
+| **Teacher ↔ Class permissions** | Restrict subject teachers to their assigned subjects only |
+| **Reports / Analytics** | Class pass-fail %, attendance %, fee collection, top students |
+| **Backup / Export** | Database backup .sql download, CSV export per table |
+| **Student bulk CSV import** | Preview + AJAX import in batches with per-row error reporting |
+| **PDF compression** | Auto-compress notice PDFs via Ghostscript |
+| **Rich-text CMS editor** | Replace plain HTML textarea with Quill/TipTap |

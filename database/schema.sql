@@ -364,3 +364,11 @@ ALTER TABLE teachers ADD COLUMN subject_id INT DEFAULT NULL AFTER subject;
 
 INSERT INTO settings (`key`,`value`) VALUES
 ('current_year_id', (SELECT CAST(id AS CHAR) FROM academic_years WHERE is_current=1 LIMIT 1));
+
+
+
+-- ==== Year-tag classes + students ====
+ALTER TABLE classes  ADD COLUMN year_id INT DEFAULT NULL AFTER capacity;
+ALTER TABLE students ADD COLUMN year_id INT DEFAULT NULL AFTER class_id;
+UPDATE classes  SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1);
+UPDATE students SET year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1);

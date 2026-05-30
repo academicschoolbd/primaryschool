@@ -10,5 +10,9 @@ public_api_headers();
 
 if (!db_ok()) json_err('Database not connected', 503);
 
-$rows = db()->query("SELECT DISTINCT name FROM classes ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+$rows = db()->query("SELECT DISTINCT name FROM classes WHERE year_id = (SELECT id FROM academic_years WHERE is_current=1 LIMIT 1) ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+if (!$rows) {
+    // fallback if no current-year rows yet
+    $rows = db()->query("SELECT DISTINCT name FROM classes ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+}
 json_ok($rows);

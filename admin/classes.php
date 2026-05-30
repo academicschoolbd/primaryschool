@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
             'section'    => trim($_POST['section'] ?? '') ?: null,
             'teacher_id' => (int)($_POST['teacher_id'] ?? 0) ?: null,
             'capacity'   => (int)($_POST['capacity'] ?? 40),
+            'year_id'    => (int)($_POST['year_id'] ?? 0) ?: current_year_id(),
         ];
         if ($data['name'] === '') {
             flash_set('error', 'Class name is required.');
@@ -28,11 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
         }
         try {
             if (!empty($_POST['id'])) {
-                db()->prepare('UPDATE classes SET name=?,section=?,teacher_id=?,capacity=? WHERE id=?')
+                db()->prepare('UPDATE classes SET name=?,section=?,teacher_id=?,capacity=?,year_id=? WHERE id=?')
                     ->execute([...array_values($data), (int)$_POST['id']]);
                 flash_set('success', 'Class updated.');
             } else {
-                db()->prepare('INSERT INTO classes (name,section,teacher_id,capacity) VALUES (?,?,?,?)')
+                db()->prepare('INSERT INTO classes (name,section,teacher_id,capacity,year_id) VALUES (?,?,?,?,?)')
                     ->execute(array_values($data));
                 flash_set('success', 'Class created.');
             }
@@ -47,13 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && db_ok()) {
         $section  = trim($_POST['section'] ?? '');
         $teacher  = (int)($_POST['teacher_id'] ?? 0) ?: null;
         $capacity = (int)($_POST['capacity'] ?? 40);
+        $yearId   = (int)($_POST['year_id'] ?? 0) ?: current_year_id();
         if ($name === '' || $section === '') {
             flash_set('error', 'Class and section are required.');
             redirect('classes.php');
         }
         try {
-            db()->prepare('INSERT INTO classes (name,section,teacher_id,capacity) VALUES (?,?,?,?)')
-                ->execute([$name, $section, $teacher, $capacity]);
+            db()->prepare('INSERT INTO classes (name,section,teacher_id,capacity,year_id) VALUES (?,?,?,?,?)')
+                ->execute([$name, $section, $teacher, $capacity, $yearId]);
             flash_set('success', "Section $section added under $name.");
         } catch (PDOException $e) {
             flash_set('error', 'Could not save: ' . $e->getMessage());
@@ -68,7 +70,7 @@ if ($action === 'delete' && $id && db_ok()) {
     redirect('classes.php');
 }
 
-$record = ['id'=>'','name'=>'','section'=>'','teacher_id'=>'','capacity'=>40];
+$record = ['id'=>'','name'=>'','section'=>'','teacher_id'=>'','capacity'=>40,'year_id'=>current_year_id()];
 if ($action === 'edit' && $id && db_ok()) {
     $stmt = db()->prepare('SELECT * FROM classes WHERE id = ?');
     $stmt->execute([$id]);
@@ -76,15 +78,26 @@ if ($action === 'edit' && $id && db_ok()) {
     if ($row) $record = $row;
 }
 
+$filterYear = (int)($_GET['filter_year'] ?? current_year_id() ?? 0);
+
 $classes = [];
 if (db_ok() && $action === 'list') {
-    $classes = db()->query("
-        SELECT c.*, t.name AS teacher_name,
+    $where = $filterYear ? ' WHERE c.year_id = ?' : '';
+    $args  = $filterYear ? [$filterYear] : [];
+    $stmt = db()->prepare("
+        SELECT c.*, t.name AS teacher_name, ay.name AS year_name,
                (SELECT COUNT(*) FROM students WHERE class_id = c.id) AS students_count
-        FROM classes c LEFT JOIN teachers t ON t.id = c.teacher_id
-        ORDER BY c.name, c.section
-    ")->fetchAll();
+        FROM classes c
+        LEFT JOIN teachers t       ON t.id = c.teacher_id
+        LEFT JOIN academic_years ay ON ay.id = c.year_id
+        $where
+        ORDER BY ay.name DESC, c.name, c.section
+    ");
+    $stmt->execute($args);
+    $classes = $stmt->fetchAll();
 }
+
+$yearOptions = all_years();
 ?>
 
 <div class="page-head">
@@ -127,6 +140,16 @@ if (db_ok() && $action === 'list') {
             <div class="field">
                 <label>Section (optional)</label>
                 <input type="text" name="section" placeholder="e.g. A" value="<?= e($record['section']) ?>">
+            </div>
+            <div class="field">
+                <label>Academic Year <span style="color:#dc2626;">*</span></label>
+                <select name="year_id" required>
+                    <?php foreach ($yearOptions as $y): ?>
+                    <option value="<?= $y['id'] ?>" <?= (int)$record['year_id']===(int)$y['id']?'selected':'' ?>>
+                        <?= e($y['name']) ?><?= $y['is_current'] ? ' (current)' : '' ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="field">
                 <label>Class teacher</label>
@@ -201,24 +224,35 @@ if (db_ok() && $action === 'list') {
 
 <div class="card">
     <div class="toolbar">
-        <span style="color:var(--muted);font-size:13px;">
-            <i class="bi bi-info-circle"></i>
-            Click a teacher cell to <b>reassign</b> instantly (AJAX, no save needed).
-        </span>
+        <form method="get" style="display:flex;align-items:center;gap:10px;">
+            <span style="color:var(--muted);font-size:13px;">Filter:</span>
+            <select name="filter_year" onchange="this.form.submit()" style="padding:7px 12px;border:1px solid var(--line);border-radius:8px;">
+                <option value="0" <?= !$filterYear?'selected':'' ?>>All years</option>
+                <?php foreach ($yearOptions as $y): ?>
+                <option value="<?= $y['id'] ?>" <?= $filterYear===(int)$y['id']?'selected':'' ?>>
+                    <?= e($y['name']) ?><?= $y['is_current'] ? ' (current)' : '' ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <span style="color:var(--muted);font-size:13px;">
+                <i class="bi bi-info-circle"></i>
+                Click teacher to <b>reassign</b> via AJAX
+            </span>
+        </form>
         <span class="badge badge-info"><?= count($classes) ?> classes</span>
     </div>
 
     <table class="tbl">
         <thead>
             <tr>
-                <th>#</th><th>Class</th><th>Section</th>
+                <th>#</th><th>Class</th><th>Section</th><th>Year</th>
                 <th style="width:200px;">Class Teacher</th>
                 <th>Students</th><th>Occupancy</th><th>Actions</th>
             </tr>
         </thead>
         <tbody>
         <?php if (!$classes): ?>
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px;">
                 No classes yet. <a href="classes.php?action=add-class">Create one</a>.
             </td></tr>
         <?php else: foreach ($classes as $c):
@@ -228,6 +262,7 @@ if (db_ok() && $action === 'list') {
                 <td><?= $c['id'] ?></td>
                 <td><b><?= e($c['name']) ?></b></td>
                 <td><?= e($c['section']) ?: '—' ?></td>
+                <td><span class="badge badge-info"><?= e($c['year_name']) ?: '—' ?></span></td>
                 <td>
                     <select class="inline-teacher" data-class-id="<?= $c['id'] ?>"
                         style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;">
