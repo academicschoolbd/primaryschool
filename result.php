@@ -61,8 +61,13 @@ if (db_ok()) {
                             <label class="rs-label">
                                 <i class="fa fa-id-badge"></i> রোল নম্বর <span class="req">*</span>
                             </label>
-                            <input class="rs-input" type="text" id="resRoll" name="roll_no"
-                                   placeholder="যেমন: STU-1001" autocomplete="off" required>
+                            <div class="rs-roll-group">
+                                <span class="rs-roll-prefix">STU-</span>
+                                <input class="rs-input rs-roll-input" type="text" id="resRoll"
+                                       inputmode="numeric" pattern="[0-9A-Za-z\-]*"
+                                       placeholder="1001" autocomplete="off" required>
+                            </div>
+                            <div class="rs-roll-hint"><i class="fa fa-circle-info"></i> শুধু নম্বরটি লিখুন (যেমন <b>1001</b>)</div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <label class="rs-label">
@@ -206,6 +211,19 @@ if (db_ok()) {
     const cls      = document.getElementById('resClass');
     const sec      = document.getElementById('resSection');
     const roll     = document.getElementById('resRoll');
+    const ROLL_PREFIX = 'STU-';
+
+    // Build the full roll_no from the user's input. Auto-prepends the prefix
+    // unless they already typed/pasted it themselves (case-insensitive).
+    function fullRollNo() {
+        const raw = (roll.value || '').trim();
+        if (!raw) return '';
+        if (raw.toUpperCase().startsWith(ROLL_PREFIX)) {
+            // Normalise "stu-1001" / "STU-1001" -> "STU-1001"
+            return ROLL_PREFIX + raw.slice(ROLL_PREFIX.length);
+        }
+        return ROLL_PREFIX + raw;
+    }
     const term     = document.getElementById('resTerm');
     const submit   = form.querySelector('button[type=submit]');
     const area     = document.getElementById('resultArea');
@@ -274,6 +292,8 @@ if (db_ok()) {
         if (!cls.value) { cls.focus(); flash('warn','শ্রেণী নির্বাচন করুন।'); return; }
         if (!sec.value) { sec.focus(); flash('warn','শাখা নির্বাচন করুন।'); return; }
         if (!roll.value.trim()) { roll.focus(); flash('warn','রোল নম্বর দিন।'); return; }
+        // If the user typed digits or accidentally typed the whole thing, normalise
+        if (!/[0-9]/.test(roll.value)) { roll.focus(); flash('warn','রোল নম্বরে সংখ্যা থাকতে হবে।'); return; }
 
         submit.disabled = true;
         const oldHtml = submit.innerHTML;
@@ -282,7 +302,7 @@ if (db_ok()) {
 
         const params = new URLSearchParams({
             class_id:  sec.value,
-            roll_no:   roll.value.trim(),
+            roll_no:   fullRollNo(),
             exam_term: term.value
         });
 
