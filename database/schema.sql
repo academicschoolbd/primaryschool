@@ -299,3 +299,24 @@ INSERT INTO pages (slug, title, body, is_published) VALUES
 ('hostel-information',     'হোস্টেলের তথ্য',            '<p>হোস্টেলের সুবিধা ও আবাসন তথ্য।</p>', 1),
 ('scholarship',            'উপবৃত্তি',                  '<p>উপবৃত্তি ও বৃত্তি সংক্রান্ত তথ্য।</p>', 1),
 ('contact',                'যোগাযোগ',                  '<p>যোগাযোগের ঠিকানা ও ফোন নম্বর।</p>', 1);
+
+
+
+-- ==== Extracurricular activities (সহ-পাঠক্রমিক) ====
+DROP TABLE IF EXISTS extracurricular;
+CREATE TABLE extracurricular (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    image VARCHAR(255),
+    description TEXT,
+    sort_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO extracurricular (name, image, sort_order) VALUES
+('Nature Club',     'https://picsum.photos/seed/nature/400/200', 1),
+('Rover Scout',     'https://picsum.photos/seed/rover/400/200',  2),
+('BNCC',            'https://picsum.photos/seed/bncc/400/200',   3),
+('Red Crescent',    'https://picsum.photos/seed/bdrcs/400/200',  4),
+('Debate Club',     'https://picsum.photos/seed/debate/400/200', 5),
+('Music Club',      'https://picsum.photos/seed/music/400/200',  6);

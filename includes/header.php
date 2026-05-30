@@ -77,6 +77,9 @@ window.APP = {
             <a href="gallery.php" class="<?= $current === 'gallery' ? 'active' : '' ?>">
                 <i class="bi bi-camera-fill"></i> Photo Gallery
             </a>
+            <a href="extracurricular.php" class="<?= $current === 'extracurricular' ? 'active' : '' ?>">
+                <i class="bi bi-star-fill"></i> Extracurricular
+            </a>
         </nav>
 
         <div class="menu-label">Academic</div>

@@ -19,7 +19,7 @@ $school = [
     'map_embed'   => '',
 ];
 
-$slides = $notices = $messages = $gallery = [];
+$slides = $notices = $messages = $gallery = $extras = [];
 $stats = [
     'students' => 0, 'teachers' => 0, 'classes' => 0, 'years' => 0,
 ];
@@ -32,6 +32,9 @@ if (db_ok()) {
     $notices  = db()->query("SELECT * FROM notices WHERE is_published=1 ORDER BY posted_at DESC LIMIT 6")->fetchAll();
     $messages = db()->query("SELECT * FROM school_messages ORDER BY sort_order, id LIMIT 4")->fetchAll();
     $gallery  = db()->query("SELECT * FROM gallery ORDER BY sort_order, id LIMIT 6")->fetchAll();
+    try {
+        $extras = db()->query("SELECT * FROM extracurricular WHERE is_active=1 ORDER BY sort_order, id LIMIT 12")->fetchAll();
+    } catch (Throwable $e) { /* table may not exist on old installs — falls back to empty */ }
 
     $stats['students'] = (int) db()->query('SELECT COUNT(*) FROM students')->fetchColumn();
     $stats['teachers'] = (int) db()->query('SELECT COUNT(*) FROM teachers')->fetchColumn();
@@ -313,8 +316,12 @@ $bnMonths = bn_months_arr();
                                         <div><?= mb_substr($mon, 0, 3) ?></div>
                                         <div style="font-size:10px;"><?= $yr ?></div>
                                     </div>
-                                    <div class="t2-notice-info">
+                                    <div class="t2-notice-info" style="flex:1;">
                                         <a href="<?= BASE_URL ?>/notices.php#n<?= (int)$n['id'] ?>"><?= e($n['title']) ?></a>
+                                        <button type="button" class="t2-notice-readmore" data-notice-id="<?= (int)$n['id'] ?>">
+                                            <i class="fa fa-book-open me-1"></i>বিস্তারিত পড়ুন
+                                            <i class="fa fa-chevron-right ms-1" style="font-size:9px;"></i>
+                                        </button>
                                     </div>
                                 </li>
                                 <?php endforeach; ?>
@@ -434,18 +441,23 @@ $bnMonths = bn_months_arr();
                         <div class="t2-card-body">
                             <div class="t2-extra-grid">
                                 <?php
-                                $extras = [
-                                    ['Nature Club',  'https://picsum.photos/seed/nature/400/200'],
-                                    ['Rover Scout',  'https://picsum.photos/seed/rover/400/200'],
-                                    ['BNCC',         'https://picsum.photos/seed/bncc/400/200'],
-                                    ['Red Crescent', 'https://picsum.photos/seed/bdrcs/400/200'],
-                                    ['Debate Club',  'https://picsum.photos/seed/debate/400/200'],
-                                    ['Music Club',   'https://picsum.photos/seed/music/400/200'],
-                                ];
-                                foreach ($extras as [$lbl, $img]): ?>
+                                // If admin hasn't seeded yet, fall back to defaults so the homepage never looks empty.
+                                if (!$extras) {
+                                    $extras = [
+                                        ['name' => 'Nature Club',  'image' => 'https://picsum.photos/seed/nature/400/200'],
+                                        ['name' => 'Rover Scout',  'image' => 'https://picsum.photos/seed/rover/400/200'],
+                                        ['name' => 'BNCC',         'image' => 'https://picsum.photos/seed/bncc/400/200'],
+                                        ['name' => 'Red Crescent', 'image' => 'https://picsum.photos/seed/bdrcs/400/200'],
+                                        ['name' => 'Debate Club',  'image' => 'https://picsum.photos/seed/debate/400/200'],
+                                        ['name' => 'Music Club',   'image' => 'https://picsum.photos/seed/music/400/200'],
+                                    ];
+                                }
+                                foreach ($extras as $ex):
+                                    $imgUrl = !empty($ex['image']) ? media_url($ex['image']) : 'https://placehold.co/400x200/1a237e/f9a825?text=' . urlencode($ex['name']);
+                                ?>
                                 <div class="t2-extra-card">
-                                    <img src="<?= e($img) ?>" alt="<?= e($lbl) ?>">
-                                    <p><?= e($lbl) ?></p>
+                                    <img src="<?= e($imgUrl) ?>" alt="<?= e($ex['name']) ?>">
+                                    <p><?= e($ex['name']) ?></p>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -616,7 +628,7 @@ $bnMonths = bn_months_arr();
 
             <div class="col-lg-3 col-md-6">
                 <?php if ($school['established']): ?>
-                <div style="background:rgba(249,168,37,0.1);border:1px solid rgba(249,168,37,0.3);border-radius:var(--radius-sm);padding:14px 16px;text-align:center;">
+                <div style="background:rgba(var(--accent-rgb),0.1);border:1px solid rgba(var(--accent-rgb),0.3);border-radius:var(--radius-sm);padding:14px 16px;text-align:center;">
                     <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">প্রতিষ্ঠাকাল</div>
                     <div style="font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1.2;"><?= e($school['established']) ?></div>
                 </div>
@@ -714,6 +726,57 @@ function t2CalPrev(){ t2Month--; if(t2Month<0){t2Month=11;t2Year--;} t2RenderCal
 function t2CalNext(){ t2Month++; if(t2Month>11){t2Month=0;t2Year++;} t2RenderCal(); }
 t2RenderCal();
 
+// ============ Notice Read More modal ============
+const noticeData = <?= json_encode(array_map(function($n){
+    return [
+        'id'       => (int)$n['id'],
+        'title'    => $n['title'],
+        'body'     => $n['body'],
+        'pdf_url'  => !empty($n['pdf_url']) ? media_url($n['pdf_url']) : null,
+        'date'     => date('M d, Y', strtotime($n['posted_at'])),
+    ];
+}, $notices), JSON_UNESCAPED_UNICODE) ?>;
+const noticeMap = {}; noticeData.forEach(n => noticeMap[n.id] = n);
+
+document.querySelectorAll('.t2-notice-readmore').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        const id = btn.dataset.noticeId;
+        const n = noticeMap[id]; if (!n) return;
+        const safe = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        const html = `<div class="fn-overlay show" style="z-index:10001;">
+            <div class="fn-modal" style="max-width:640px;">
+                <div class="fn-modal-head">
+                    <div class="icon"><i class="fa fa-clipboard-list"></i></div>
+                    <div>
+                        <div class="label">নোটিশ</div>
+                        <div class="title-bn">${safe(n.title)}</div>
+                    </div>
+                    <button type="button" class="fn-modal-close"><i class="fa fa-times"></i></button>
+                </div>
+                <div class="fn-modal-body">
+                    <div class="meta"><i class="fa fa-calendar-alt"></i> ${safe(n.date)}</div>
+                    ${n.body ? '<div style="line-height:1.85;">' + safe(n.body) + '</div>' : '<div style="color:var(--text-muted);font-style:italic;">এই নোটিশের কোনো অতিরিক্ত বিবরণ নেই।</div>'}
+                </div>
+                <div class="fn-modal-actions">
+                    ${n.pdf_url ? `<a href="${safe(n.pdf_url)}" target="_blank" class="fn-btn fn-btn-primary"><i class="fa fa-file-pdf"></i> PDF ডাউনলোড</a>` : ''}
+                    <a href="${window.APP ? window.APP.base : '<?= BASE_URL ?>'}/notices.php" class="fn-btn fn-btn-primary"><i class="fa fa-list"></i> সকল নোটিশ</a>
+                    <button type="button" class="fn-btn fn-btn-light" data-close>বন্ধ করুন</button>
+                </div>
+            </div>
+        </div>`;
+        const wrap = document.createElement('div'); wrap.innerHTML = html;
+        const overlay = wrap.firstElementChild;
+        document.body.appendChild(overlay);
+        function close() { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 250); }
+        overlay.addEventListener('click', ev => {
+            if (ev.target === overlay) close();
+            if (ev.target.closest('.fn-modal-close,[data-close]')) close();
+        });
+        document.addEventListener('keydown', ev => { if (ev.key === 'Escape') close(); }, { once: true });
+    });
+});
+
 // ============ "Coming soon" toast for placeholder links ============
 function homeToast(msg, type = 'info') {
     const colors = {
@@ -723,7 +786,7 @@ function homeToast(msg, type = 'info') {
     const t = document.createElement('div');
     t.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
         background:${colors[type] || colors.info};color:#fff;padding:12px 22px;border-radius:99px;
-        box-shadow:0 8px 24px rgba(26,35,126,.35);z-index:10000;font-size:14px;font-weight:600;
+        box-shadow:0 8px 24px rgba(var(--primary-rgb),.35);z-index:10000;font-size:14px;font-weight:600;
         opacity:0;transition:.25s;display:flex;align-items:center;gap:8px;max-width:90vw;`;
     t.innerHTML = '<i class="fa fa-info-circle" style="color:var(--accent);"></i><span>' + msg + '</span>';
     document.body.appendChild(t);

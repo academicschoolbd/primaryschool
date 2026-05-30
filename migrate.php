@@ -172,6 +172,29 @@ if (!db_ok()) {
             $results[] = '✓ Seeded ' . count($seed) . ' default CMS pages';
         }
 
+        // ── extracurricular
+        if (!tableExists('extracurricular')) {
+            db()->exec("CREATE TABLE extracurricular (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(120) NOT NULL,
+                image VARCHAR(255),
+                description TEXT,
+                sort_order INT DEFAULT 0,
+                is_active TINYINT(1) DEFAULT 1
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            $seed = [
+                ['Nature Club',  'https://picsum.photos/seed/nature/400/200', 1],
+                ['Rover Scout',  'https://picsum.photos/seed/rover/400/200',  2],
+                ['BNCC',         'https://picsum.photos/seed/bncc/400/200',   3],
+                ['Red Crescent', 'https://picsum.photos/seed/bdrcs/400/200',  4],
+                ['Debate Club',  'https://picsum.photos/seed/debate/400/200', 5],
+                ['Music Club',   'https://picsum.photos/seed/music/400/200',  6],
+            ];
+            $stmt = db()->prepare('INSERT INTO extracurricular (name,image,sort_order) VALUES (?,?,?)');
+            foreach ($seed as [$n,$img,$o]) $stmt->execute([$n,$img,$o]);
+            $results[] = '✓ Created <code>extracurricular</code> table + ' . count($seed) . ' default activities';
+        }
+
         // ── Seed default settings rows (only inserts what's missing)
         $defaults = [
             'theme_primary'             => '#1a237e',

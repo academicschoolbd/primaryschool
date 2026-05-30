@@ -51,7 +51,7 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <?php if ($school['established']): ?>
-                <div style="background:rgba(249,168,37,0.1);border:1px solid rgba(249,168,37,0.3);border-radius:var(--radius-sm);padding:14px 16px;text-align:center;">
+                <div style="background:rgba(var(--accent-rgb),0.1);border:1px solid rgba(var(--accent-rgb),0.3);border-radius:var(--radius-sm);padding:14px 16px;text-align:center;">
                     <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">প্রতিষ্ঠাকাল</div>
                     <div style="font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1.2;"><?= e($school['established']) ?></div>
                 </div>
@@ -108,7 +108,7 @@ function publicToast(msg, type = 'info') {
     const t = document.createElement('div');
     t.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
         background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;
-        padding:12px 22px;border-radius:99px;box-shadow:0 8px 24px rgba(26,35,126,.35);
+        padding:12px 22px;border-radius:99px;box-shadow:0 8px 24px rgba(var(--primary-rgb),.35);
         z-index:10000;font-size:14px;font-weight:600;opacity:0;transition:.25s;
         display:flex;align-items:center;gap:8px;max-width:90vw;`;
     t.innerHTML = '<i class="fa fa-info-circle" style="color:var(--accent);"></i><span>' + msg + '</span>';
